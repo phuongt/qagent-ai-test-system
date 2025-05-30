@@ -82,6 +82,7 @@
             #description {
                 padding: 0.5rem !important;
                 font-size: 0.8rem !important;
+                max-height: 8rem !important; /* Shorter on mobile */
             }
         }
         
@@ -137,7 +138,7 @@
                 <textarea 
                     id="description" 
                     rows="3" 
-                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.4rem; background: white; font-size: 0.75rem; resize: none; outline: none; box-sizing: border-box; overflow: hidden; min-height: 3rem;"
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.4rem; background: white; font-size: 0.75rem; resize: none; outline: none; box-sizing: border-box; min-height: 3rem; max-height: 10rem; overflow-y: auto;"
                     placeholder="Describe the functionality you want to test..."
                 ></textarea>
             </div>
@@ -304,7 +305,20 @@
                 // Auto-resize function for textarea
                 function autoResize(element) {
                     element.style.height = 'auto';
-                    element.style.height = Math.max(element.scrollHeight, 48) + 'px'; // min-height: 3rem = 48px
+                    const isMobile = window.innerWidth <= 768;
+                    const maxHeight = isMobile ? 128 : 160; // 8rem mobile, 10rem desktop
+                    const minHeight = 48;  // 3rem = 48px
+                    const scrollHeight = element.scrollHeight;
+                    
+                    if (scrollHeight <= maxHeight) {
+                        // Auto-resize without scroll
+                        element.style.height = Math.max(scrollHeight, minHeight) + 'px';
+                        element.style.overflowY = 'hidden';
+                    } else {
+                        // Max height reached, show scroll
+                        element.style.height = maxHeight + 'px';
+                        element.style.overflowY = 'auto';
+                    }
                 }
                 
                 // Add auto-resize event listener
@@ -314,6 +328,11 @@
                 
                 // Initialize auto-resize
                 autoResize(textarea);
+                
+                // Handle window resize for responsive max-height
+                window.addEventListener('resize', function() {
+                    autoResize(textarea);
+                });
                 
                 const typed = new Typed("#description", {
                     strings: [

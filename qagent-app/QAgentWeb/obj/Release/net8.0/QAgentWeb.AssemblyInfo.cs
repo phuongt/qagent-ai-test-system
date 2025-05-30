@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QAgentWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+03077568fd8cf4d329761558ce5de7b814e7cb01")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b9ffc63d79cf2577b2cf14cb6f3da336290c9bfc")]
 [assembly: System.Reflection.AssemblyProductAttribute("QAgentWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QAgentWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
