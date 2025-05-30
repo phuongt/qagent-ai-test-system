@@ -178,3 +178,4 @@ C:\Customize\01.QAgent\qagent-app\QAgentWeb\obj\Release\net8.0\QAgentWeb.Resourc
 C:\Customize\01.QAgent\qagent-app\QAgentWeb\obj\Release\net8.0\QAgentWeb.Resources.Pages.UC09.Index.vi.resources
 C:\Customize\01.QAgent\qagent-app\QAgentWeb\obj\Release\net8.0\QAgentWeb.Resources.Pages.UC10.Index.en.resources
 C:\Customize\01.QAgent\qagent-app\QAgentWeb\obj\Release\net8.0\QAgentWeb.Resources.Pages.UC10.Index.vi.resources
+C:\Customize\01.QAgent\qagent-app\QAgentWeb\obj\Release\net8.0\QAgentWeb.sourcelink.json

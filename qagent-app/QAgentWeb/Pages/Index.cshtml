@@ -7,7 +7,7 @@
     ViewData["Description"] = "QAgent là hệ thống quản lý kiểm thử thông minh với AI, hỗ trợ upload UI screenshots, phân tích nghiệp vụ và sinh test case tự động.";
 }
 
-<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); overflow: hidden; padding: 3.5rem; box-sizing: border-box;">
+<div style="width: 100%; min-height: 100%; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 2rem 1rem; box-sizing: border-box;">
     <style>
         .workflow-step {
             position: relative;
@@ -38,10 +38,50 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 1.5fr) minmax(260px, 1fr);
+            gap: 2rem;
+            align-items: start;
+            max-width: 950px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .left-column {
+            width: 100%;
+            padding-left: 1rem;
+        }
+        
+        .right-column {
+            width: 100%;
+            padding-left: 1rem;
+        }
+        
+        /* Mobile responsive styles */
         @@media (max-width: 1024px) {
             .main-grid {
                 grid-template-columns: 1fr !important;
+                gap: 1.5rem !important;
+            }
+            .left-column,
+            .right-column {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            .main-grid {
                 gap: 1rem !important;
+            }
+            .workflow-step {
+                margin-bottom: 1rem !important;
+            }
+            #description {
+                padding: 0.5rem !important;
+                font-size: 0.8rem !important;
             }
         }
         
@@ -56,7 +96,7 @@
     </style>
 
     <!-- Hero Section -->
-    <div style="text-align: center; margin-bottom: 3.5rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
         <h1 style="font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
             Quality on the double<span style="margin-left: 0.5rem;">🤖</span> QAgent
         </h1>
@@ -66,10 +106,10 @@
     </div>
 
     <!-- Main Content Grid -->
-    <div class="main-grid" style="display: grid; grid-template-columns: minmax(260px, 1.5fr) minmax(260px, 1fr); gap: 0.5rem; align-items: start; max-width: 950px; margin: 0 auto; width: 100%; height: 150%; overflow: hidden; ">
+    <div class="main-grid">
         
         <!-- Left Column - Upload Section -->
-        <div style="width: 100%; height: fit-content; overflow: hidden;padding-left:3rem;">
+        <div class="left-column">
             <!-- Upload Area -->
             <div id="drop-zone" class="glass-effect" style="border: 2px dashed #3b82f6; border-radius: 0.5rem; padding:2rem; cursor: pointer; transition: all 0.3s; margin-bottom: 2rem; width: 100%; box-sizing: border-box;">
                 <!-- Upload Icon -->
@@ -96,8 +136,8 @@
                 </label>
                 <textarea 
                     id="description" 
-                    rows="2" 
-                    style="width: 100%; padding: 2.2rem 0.8rem; border: 1px solid #d1d5db; border-radius: 0.4rem; background: white; font-size: 0.75rem; resize: none; outline: none; box-sizing: border-box;"
+                    rows="3" 
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.4rem; background: white; font-size: 0.75rem; resize: none; outline: none; box-sizing: border-box; overflow: hidden; min-height: 3rem;"
                     placeholder="Describe the functionality you want to test..."
                 ></textarea>
             </div>
@@ -109,7 +149,7 @@
         </div>
 
         <!-- Right Column - Workflow Steps -->
-        <div style="width: 100%; height: fit-content; overflow: hidden;padding-left:3rem;">
+        <div class="right-column">
             <!-- Step 1 -->
             <div class="workflow-step" style="display: flex; align-items: flex-start; gap: 0.6rem;margin-bottom:1.35rem;">
                 <div class="workflow-icon" style="flex-shrink: 0; width: 2.2rem; height: 2.2rem; background: #374151; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -261,6 +301,20 @@
             console.log('Typed available:', typeof Typed);
             
             if (typeof Typed !== 'undefined' && textarea) {
+                // Auto-resize function for textarea
+                function autoResize(element) {
+                    element.style.height = 'auto';
+                    element.style.height = Math.max(element.scrollHeight, 48) + 'px'; // min-height: 3rem = 48px
+                }
+                
+                // Add auto-resize event listener
+                textarea.addEventListener('input', function() {
+                    autoResize(this);
+                });
+                
+                // Initialize auto-resize
+                autoResize(textarea);
+                
                 const typed = new Typed("#description", {
                     strings: [
                         "Describe the login functionality you want to test...",
@@ -293,6 +347,7 @@
                 textarea.addEventListener('focus', function() {
                     typed.stop();
                     textarea.classList.remove('typed-js-active');
+                    autoResize(this);
                 });
                 
                 // Restart typing when user leaves textarea (if empty)
@@ -301,6 +356,7 @@
                         typed.start();
                         textarea.classList.add('typed-js-active');
                     }
+                    autoResize(this);
                 });
                 
                 console.log('Typed.js initialized successfully');

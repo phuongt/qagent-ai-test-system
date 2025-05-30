@@ -45,26 +45,22 @@
         }
         html {
             width: 100vw !important;
-            height: 100vh !important;
-            overflow: hidden !important;
             margin: 0 !important;
             padding: 0 !important;
         }
         body {
             width: 100vw !important;
-            height: 100vh !important;
-            overflow: hidden !important;
             margin: 0 !important;
             padding: 0 !important;
             background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+            min-height: 100vh !important;
         }
         body.bg-gray-50 {
             background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
         }
         main {
             background: transparent !important;
-            height: calc(100vh - 112px) !important;
-            overflow: hidden !important;
+            min-height: calc(100vh - 112px) !important;
             margin: 0 !important;
             padding: 0 !important;
         }
@@ -92,6 +88,23 @@
             height: 48px !important;
             padding: 0.75rem 0 !important;
             margin: 0 !important;
+        }
+        
+        /* Mobile responsive improvements */
+        @@media (max-width: 768px) {
+            html, body {
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+            }
+            main {
+                height: auto !important;
+                min-height: calc(100vh - 112px) !important;
+                overflow: visible !important;
+            }
+            .container {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
         }
     </style>
     
