@@ -7,7 +7,7 @@
     ViewData["Description"] = "QAgent là hệ thống quản lý kiểm thử thông minh với AI, hỗ trợ upload UI screenshots, phân tích nghiệp vụ và sinh test case tự động.";
 }
 
-<div style="width: 100%; min-height: 100%; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 2rem 1rem; box-sizing: border-box;">
+<div style="width: 100%; min-height: 100%; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 2rem 1rem; box-sizing: border-box; overflow-x: hidden;">
     <style>
         .workflow-step {
             position: relative;
@@ -47,16 +47,21 @@
             max-width: 950px;
             margin: 0 auto;
             width: 100%;
+            overflow: hidden;
         }
         
         .left-column {
             width: 100%;
             padding-left: 1rem;
+            max-width: 100%;
+            overflow: hidden;
         }
         
         .right-column {
             width: 100%;
             padding-left: 1rem;
+            max-width: 100%;
+            overflow: hidden;
         }
         
         /* Mobile responsive styles */
@@ -69,12 +74,14 @@
             .right-column {
                 padding-left: 0 !important;
                 padding-right: 0 !important;
+                max-width: 100% !important;
             }
         }
         
         @@media (max-width: 768px) {
             .main-grid {
                 gap: 1rem !important;
+                max-width: 100% !important;
             }
             .workflow-step {
                 margin-bottom: 1rem !important;
@@ -138,7 +145,7 @@
                 <textarea 
                     id="description" 
                     rows="3" 
-                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.4rem; background: white; font-size: 0.75rem; resize: none; outline: none; box-sizing: border-box; min-height: 3rem; max-height: 10rem; overflow-y: auto;"
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.4rem; background: white; font-size: 0.75rem; resize: none; outline: none; box-sizing: border-box; min-height: 6rem; max-height: 20rem; overflow-y: auto;"
                     placeholder="Describe the functionality you want to test..."
                 ></textarea>
             </div>
@@ -306,8 +313,8 @@
                 function autoResize(element) {
                     element.style.height = 'auto';
                     const isMobile = window.innerWidth <= 768;
-                    const maxHeight = isMobile ? 128 : 160; // 8rem mobile, 10rem desktop
-                    const minHeight = 48;  // 3rem = 48px
+                    const maxHeight = isMobile ? 128 : 320; // 8rem mobile, 20rem desktop (20 * 16 = 320px)
+                    const minHeight = 96;  // 6rem = 96px
                     const scrollHeight = element.scrollHeight;
                     
                     if (scrollHeight <= maxHeight) {
