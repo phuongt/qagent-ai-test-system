@@ -1,0 +1,46 @@
+[2025-05-30 17:24:08] [INFO] 🚀 Bắt đầu test tính năng Default Image...
+[2025-05-30 17:24:08] [INFO] Target URL: http://localhost:5174
+[2025-05-30 17:24:08] [INFO] 🔍 Kiểm tra ứng dụng đang chạy...
+[2025-05-30 17:24:09] [SUCCESS] ✁EỨng dụng đang chạy tại http://localhost:5174
+[2025-05-30 17:24:09] [INFO] 🧪 Chạy các test cases...
+[2025-05-30 17:24:09] [INFO] 🎨 Kiểm tra CSS classes cho default image...
+[2025-05-30 17:24:09] [SUCCESS] ✁ECSS class tìm thấy: .default-image-placeholder
+[2025-05-30 17:24:09] [SUCCESS] ✁ECSS class tìm thấy: .image-with-fallback
+[2025-05-30 17:24:09] [SUCCESS] ✁ECSS class tìm thấy: .fallback
+[2025-05-30 17:24:09] [SUCCESS] ✁EPurple gradient background được tìm thấy
+[2025-05-30 17:24:09] [INFO] 🏗�E�EKiểm tra cấu trúc HTML trong UC02...
+[2025-05-30 17:24:09] [SUCCESS] ✁EHTML element tìm thấy: default-image-placeholder
+[2025-05-30 17:24:09] [SUCCESS] ✁EHTML element tìm thấy: image-with-fallback
+[2025-05-30 17:24:09] [SUCCESS] ✁EHTML element tìm thấy: handleImageError
+[2025-05-30 17:24:09] [SUCCESS] ✁EHTML element tìm thấy: showDefaultImageModal
+[2025-05-30 17:24:09] [SUCCESS] ✁EHTML element tìm thấy: No Preview Available
+[2025-05-30 17:24:09] [SUCCESS] ✁EHTML element tìm thấy: Image Not Available
+[2025-05-30 17:24:09] [INFO] ⚙︁EKiểm tra JavaScript functions...
+[2025-05-30 17:24:09] [SUCCESS] ✁EJavaScript function tìm thấy: function handleImageError
+[2025-05-30 17:24:09] [SUCCESS] ✁EJavaScript function tìm thấy: function showImageModal
+[2025-05-30 17:24:09] [SUCCESS] ✁EJavaScript function tìm thấy: function showDefaultImageModal
+[2025-05-30 17:24:09] [SUCCESS] ✁EJavaScript function tìm thấy: function closeImageModal
+[2025-05-30 17:24:09] [INFO] 🌐 Kiểm tra trang UC02...
+[2025-05-30 17:24:11] [SUCCESS] ✁ETrang UC02 có hiển thềE'No Preview Available'
+[2025-05-30 17:24:11] [SUCCESS] ✁ECSS classes được áp dụng trong trang
+[2025-05-30 17:24:11] [INFO] 📊 Tạo báo cáo test...
+[2025-05-30 17:24:11] [*] =
+[2025-05-30 17:24:11] [INFO] DEFAULT IMAGE FEATURE TEST REPORT
+[2025-05-30 17:24:11] [*] =
+[2025-05-30 17:24:11] [INFO] Test Results:
+[2025-05-30 17:24:11] [INFO]   ✁ECSS Classes: PASS
+[2025-05-30 17:24:11] [INFO]   ✁EDefault Placeholders: PASS
+[2025-05-30 17:24:11] [INFO]   ✁EImage Error Handling: PASS
+[2025-05-30 17:24:11] [INFO]   ✁EModal Functionality: PASS
+[2025-05-30 17:24:11] [INFO]   ✁EJavaScript Functions: PASS
+[2025-05-30 17:24:11] [INFO] 
+[2025-05-30 17:24:11] [INFO] Summary:
+[2025-05-30 17:24:11] [INFO]   Total Tests: 5
+[2025-05-30 17:24:11] [INFO]   Passed: 5
+[2025-05-30 17:24:11] [INFO]   Failed: 0
+[2025-05-30 17:24:11] [INFO]   Success Rate: 100%
+[2025-05-30 17:24:11] [INFO] 
+[2025-05-30 17:24:11] [INFO] Overall Status: 🎉 SUCCESS
+[2025-05-30 17:24:11] [*] =
+[2025-05-30 17:24:11] [INFO] 📄 Báo cáo đã được lưu: UC02_DEFAULT_IMAGE_TEST_REPORT_20250530_172411.md
+[2025-05-30 17:24:11] [SUCCESS] 🎉 TẤT CẢ TEST THÀNH CÔNG! Default image feature hoạt động hoàn hảo.
