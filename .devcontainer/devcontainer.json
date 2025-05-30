@@ -1,0 +1,26 @@
+{
+  "name": "QAgent ASP.NET Core",
+  "image": "mcr.microsoft.com/dotnet/sdk:8.0",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  },
+  "postCreateCommand": "cd qagent-app/QAgentWeb && dotnet restore && npm install",
+  "forwardPorts": [5174],
+  "portsAttributes": {
+    "5174": {
+      "label": "QAgent Web App",
+      "visibility": "public"
+    }
+  }
+} 
