@@ -1,0 +1,539 @@
+---
+description: 
+globs: *.cs
+alwaysApply: false
+---
+# Database & ORM Framework (Entity Framework Core) cho ASP.NET Core
+
+## Critical Rules
+
+- **Entity Framework Core**: Sử dụng EF Core làm ORM framework chính
+- **Code First Approach**: Database schema từ C# models với migrations
+- **Repository Pattern**: Implement Repository và Unit of Work patterns
+- **DbContext Lifetime**: Scoped lifetime cho DbContext trong DI
+- **Connection Strings**: Secure configuration với multiple environments
+- **Migrations**: Version control cho database schema changes
+- **Query Optimization**: Sử dụng IQueryable, Include(), pagination
+- **Data Annotations**: Validation và database constraints
+- **Audit Fields**: CreatedAt, UpdatedAt, CreatedBy, UpdatedBy
+- **Soft Delete**: Implement IsDeleted field thay vì hard delete
+
+## Examples
+
+<example>
+  // ✅ Correct Entity Model với Audit Fields
+  public abstract class BaseEntity
+  {
+      public int Id { get; set; }
+      public DateTime CreatedAt { get; set; }
+      public DateTime UpdatedAt { get; set; }
+      public string CreatedBy { get; set; } = string.Empty;
+      public string UpdatedBy { get; set; } = string.Empty;
+      public bool IsDeleted { get; set; } = false;
+  }
+  
+  // Models/User.cs
+  [Table("Users")]
+  public class User : BaseEntity
+  {
+      [Required]
+      [MaxLength(100)]
+      public string Name { get; set; } = string.Empty;
+      
+      [Required]
+      [MaxLength(255)]
+      [EmailAddress]
+      public string Email { get; set; } = string.Empty;
+      
+      [MaxLength(20)]
+      public string? PhoneNumber { get; set; }
+      
+      public UserRole Role { get; set; } = UserRole.User;
+      
+      // Navigation properties
+      public virtual ICollection<UserProfile> Profiles { get; set; } = new List<UserProfile>();
+      public virtual ICollection<ActivityLog> ActivityLogs { get; set; } = new List<ActivityLog>();
+  }
+  
+  // Models/UserProfile.cs
+  [Table("UserProfiles")]
+  public class UserProfile : BaseEntity
+  {
+      [Required]
+      public int UserId { get; set; }
+      
+      [Required]
+      [MaxLength(50)]
+      public string ProfileType { get; set; } = string.Empty; // OpenAI, GoogleDrive, etc.
+      
+      [Required]
+      public string Configuration { get; set; } = string.Empty; // JSON config
+      
+      public bool IsActive { get; set; } = true;
+      
+      // Navigation properties
+      [ForeignKey(nameof(UserId))]
+      public virtual User User { get; set; } = null!;
+  }
+  
+  // ✅ Correct DbContext Configuration
+  public class QAgentDbContext : DbContext
+  {
+      public QAgentDbContext(DbContextOptions<QAgentDbContext> options) : base(options) { }
+      
+      public DbSet<User> Users { get; set; }
+      public DbSet<UserProfile> UserProfiles { get; set; }
+      public DbSet<ActivityLog> ActivityLogs { get; set; }
+      public DbSet<ExportHistory> ExportHistories { get; set; }
+      
+      protected override void OnModelCreating(ModelBuilder modelBuilder)
+      {
+          base.OnModelCreating(modelBuilder);
+          
+          // Global query filters for soft delete
+          modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
+          modelBuilder.Entity<UserProfile>().HasQueryFilter(e => !e.IsDeleted);
+          
+          // Indexes for performance
+          modelBuilder.Entity<User>()
+              .HasIndex(u => u.Email)
+              .IsUnique()
+              .HasDatabaseName("IX_Users_Email");
+              
+          modelBuilder.Entity<UserProfile>()
+              .HasIndex(up => new { up.UserId, up.ProfileType })
+              .HasDatabaseName("IX_UserProfiles_UserId_ProfileType");
+          
+          // Relationships
+          modelBuilder.Entity<UserProfile>()
+              .HasOne(up => up.User)
+              .WithMany(u => u.Profiles)
+              .HasForeignKey(up => up.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
+          
+          // Value conversions
+          modelBuilder.Entity<User>()
+              .Property(u => u.Role)
+              .HasConversion<string>();
+          
+          // Seed data
+          modelBuilder.Entity<User>().HasData(
+              new User 
+              { 
+                  Id = 1, 
+                  Name = "Admin", 
+                  Email = "admin@qagent.com", 
+                  Role = UserRole.Admin,
+                  CreatedAt = DateTime.UtcNow,
+                  UpdatedAt = DateTime.UtcNow,
+                  CreatedBy = "System",
+                  UpdatedBy = "System"
+              }
+          );
+      }
+      
+      public override int SaveChanges()
+      {
+          UpdateAuditFields();
+          return base.SaveChanges();
+      }
+      
+      public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+      {
+          UpdateAuditFields();
+          return base.SaveChangesAsync(cancellationToken);
+      }
+      
+      private void UpdateAuditFields()
+      {
+          var entries = ChangeTracker.Entries<BaseEntity>();
+          
+          foreach (var entry in entries)
+          {
+              switch (entry.State)
+              {
+                  case EntityState.Added:
+                      entry.Entity.CreatedAt = DateTime.UtcNow;
+                      entry.Entity.UpdatedAt = DateTime.UtcNow;
+                      // TODO: Get current user from HttpContext
+                      break;
+                      
+                  case EntityState.Modified:
+                      entry.Entity.UpdatedAt = DateTime.UtcNow;
+                      // TODO: Get current user from HttpContext
+                      break;
+              }
+          }
+      }
+  }
+  
+  // ✅ Correct Repository Pattern
+  public interface IRepository<T> where T : BaseEntity
+  {
+      Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+      Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
+      Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
+      Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);
+      Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
+      Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+      Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+      IQueryable<T> Query();
+  }
+  
+  public class Repository<T> : IRepository<T> where T : BaseEntity
+  {
+      protected readonly QAgentDbContext _context;
+      protected readonly DbSet<T> _dbSet;
+      
+      public Repository(QAgentDbContext context)
+      {
+          _context = context;
+          _dbSet = context.Set<T>();
+      }
+      
+      public virtual async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+      {
+          return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+      }
+      
+      public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
+      {
+          return await _dbSet.ToListAsync(cancellationToken);
+      }
+      
+      public virtual async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+      {
+          return await _dbSet
+              .Skip((pageNumber - 1) * pageSize)
+              .Take(pageSize)
+              .ToListAsync(cancellationToken);
+      }
+      
+      public virtual async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
+      {
+          var entry = await _dbSet.AddAsync(entity, cancellationToken);
+          return entry.Entity;
+      }
+      
+      public virtual Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+      {
+          _dbSet.Update(entity);
+          return Task.CompletedTask;
+      }
+      
+      public virtual async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+      {
+          var entity = await GetByIdAsync(id, cancellationToken);
+          if (entity != null)
+          {
+              entity.IsDeleted = true; // Soft delete
+              await UpdateAsync(entity, cancellationToken);
+          }
+      }
+      
+      public virtual async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
+      {
+          return await _dbSet.AnyAsync(e => e.Id == id, cancellationToken);
+      }
+      
+      public virtual IQueryable<T> Query()
+      {
+          return _dbSet.AsQueryable();
+      }
+  }
+  
+  // ✅ Correct Specific Repository
+  public interface IUserRepository : IRepository<User>
+  {
+      Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+      Task<IEnumerable<User>> GetByRoleAsync(UserRole role, CancellationToken cancellationToken = default);
+      Task<User?> GetWithProfilesAsync(int id, CancellationToken cancellationToken = default);
+  }
+  
+  public class UserRepository : Repository<User>, IUserRepository
+  {
+      public UserRepository(QAgentDbContext context) : base(context) { }
+      
+      public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+      {
+          return await _dbSet
+              .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+      }
+      
+      public async Task<IEnumerable<User>> GetByRoleAsync(UserRole role, CancellationToken cancellationToken = default)
+      {
+          return await _dbSet
+              .Where(u => u.Role == role)
+              .ToListAsync(cancellationToken);
+      }
+      
+      public async Task<User?> GetWithProfilesAsync(int id, CancellationToken cancellationToken = default)
+      {
+          return await _dbSet
+              .Include(u => u.Profiles.Where(p => p.IsActive))
+              .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+      }
+  }
+  
+  // ✅ Correct Unit of Work Pattern
+  public interface IUnitOfWork : IDisposable
+  {
+      IUserRepository Users { get; }
+      IRepository<UserProfile> UserProfiles { get; }
+      IRepository<ActivityLog> ActivityLogs { get; }
+      
+      Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+      Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+      Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+      Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
+  }
+  
+  public class UnitOfWork : IUnitOfWork
+  {
+      private readonly QAgentDbContext _context;
+      private IDbContextTransaction? _transaction;
+      
+      public UnitOfWork(QAgentDbContext context)
+      {
+          _context = context;
+          Users = new UserRepository(_context);
+          UserProfiles = new Repository<UserProfile>(_context);
+          ActivityLogs = new Repository<ActivityLog>(_context);
+      }
+      
+      public IUserRepository Users { get; }
+      public IRepository<UserProfile> UserProfiles { get; }
+      public IRepository<ActivityLog> ActivityLogs { get; }
+      
+      public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+      {
+          return await _context.SaveChangesAsync(cancellationToken);
+      }
+      
+      public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+      {
+          _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+      }
+      
+      public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+      {
+          if (_transaction != null)
+          {
+              await _transaction.CommitAsync(cancellationToken);
+              await _transaction.DisposeAsync();
+              _transaction = null;
+          }
+      }
+      
+      public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+      {
+          if (_transaction != null)
+          {
+              await _transaction.RollbackAsync(cancellationToken);
+              await _transaction.DisposeAsync();
+              _transaction = null;
+          }
+      }
+      
+      public void Dispose()
+      {
+          _transaction?.Dispose();
+          _context.Dispose();
+      }
+  }
+  
+  // ✅ Correct Program.cs Configuration
+  // Connection String
+  builder.Services.AddDbContext<QAgentDbContext>(options =>
+  {
+      var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+      options.UseSqlServer(connectionString, sqlOptions =>
+      {
+          sqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
+          sqlOptions.CommandTimeout(30);
+      });
+      
+      if (builder.Environment.IsDevelopment())
+      {
+          options.EnableSensitiveDataLogging();
+          options.EnableDetailedErrors();
+      }
+  });
+  
+  // Repository Registration
+  builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+  builder.Services.AddScoped<IUserRepository, UserRepository>();
+  builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+  
+  // ✅ Correct appsettings.json
+  {
+    "ConnectionStrings": {
+      "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=QAgentDb;Trusted_Connection=true;MultipleActiveResultSets=true"
+    },
+    "EntityFramework": {
+      "CommandTimeout": 30,
+      "EnableRetryOnFailure": true,
+      "MaxRetryCount": 3
+    }
+  }
+  
+  // ✅ Correct Migration Commands
+  // Add migration
+  dotnet ef migrations add InitialCreate
+  
+  // Update database
+  dotnet ef database update
+  
+  // Generate SQL script
+  dotnet ef migrations script
+  
+  // Remove last migration
+  dotnet ef migrations remove
+  
+  // ✅ Correct Service Layer với Repository
+  public class UserService : IUserService
+  {
+      private readonly IUnitOfWork _unitOfWork;
+      private readonly ILogger<UserService> _logger;
+      
+      public UserService(IUnitOfWork unitOfWork, ILogger<UserService> logger)
+      {
+          _unitOfWork = unitOfWork;
+          _logger = logger;
+      }
+      
+      public async Task<UserDto> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
+      {
+          try
+          {
+              await _unitOfWork.BeginTransactionAsync(cancellationToken);
+              
+              // Check if user exists
+              var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email, cancellationToken);
+              if (existingUser != null)
+              {
+                  throw new BusinessException("User with this email already exists");
+              }
+              
+              // Create user
+              var user = new User
+              {
+                  Name = request.Name,
+                  Email = request.Email,
+                  Role = request.Role
+              };
+              
+              await _unitOfWork.Users.AddAsync(user, cancellationToken);
+              await _unitOfWork.SaveChangesAsync(cancellationToken);
+              
+              // Create default profile
+              var profile = new UserProfile
+              {
+                  UserId = user.Id,
+                  ProfileType = "Default",
+                  Configuration = "{}"
+              };
+              
+              await _unitOfWork.UserProfiles.AddAsync(profile, cancellationToken);
+              await _unitOfWork.SaveChangesAsync(cancellationToken);
+              
+              await _unitOfWork.CommitTransactionAsync(cancellationToken);
+              
+              return user.ToDto();
+          }
+          catch (Exception ex)
+          {
+              await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+              _logger.LogError(ex, "Error creating user with email {Email}", request.Email);
+              throw;
+          }
+      }
+  }
+</example>
+
+<example type="invalid">
+  // ❌ Sai: Direct DbContext injection trong Page Model
+  public class IndexModel : PageModel
+  {
+      private readonly QAgentDbContext _context;
+      
+      public IndexModel(QAgentDbContext context)
+      {
+          _context = context; // Nên sử dụng Repository/Service pattern
+      }
+      
+      public async Task OnGetAsync()
+      {
+          Users = await _context.Users.ToListAsync(); // Direct EF queries trong UI layer
+      }
+  }
+  
+  // ❌ Sai: Không sử dụng async/await
+  public List<User> GetAllUsers()
+  {
+      return _context.Users.ToList(); // Blocking call
+  }
+  
+  // ❌ Sai: N+1 Query Problem
+  public async Task<List<User>> GetUsersWithProfiles()
+  {
+      var users = await _context.Users.ToListAsync();
+      foreach (var user in users)
+      {
+          user.Profiles = await _context.UserProfiles
+              .Where(p => p.UserId == user.Id).ToListAsync(); // N+1 queries
+      }
+      return users;
+  }
+  
+  // ❌ Sai: Không có audit fields
+  public class User
+  {
+      public int Id { get; set; }
+      public string Name { get; set; }
+      // Thiếu CreatedAt, UpdatedAt, IsDeleted
+  }
+  
+  // ❌ Sai: Hard delete thay vì soft delete
+  public async Task DeleteUser(int id)
+  {
+      var user = await _context.Users.FindAsync(id);
+      if (user != null)
+      {
+          _context.Users.Remove(user); // Hard delete
+          await _context.SaveChangesAsync();
+      }
+  }
+  
+  // ❌ Sai: Không sử dụng transactions
+  public async Task CreateUserWithProfile(User user, UserProfile profile)
+  {
+      await _context.Users.AddAsync(user);
+      await _context.SaveChangesAsync(); // Save 1
+      
+      profile.UserId = user.Id;
+      await _context.UserProfiles.AddAsync(profile);
+      await _context.SaveChangesAsync(); // Save 2 - không atomic
+  }
+  
+  // ❌ Sai: Connection string hardcoded
+  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+  {
+      optionsBuilder.UseSqlServer("Server=localhost;Database=QAgent;..."); // Hardcoded
+  }
+  
+  // ❌ Sai: Không có query filters cho soft delete
+  public async Task<List<User>> GetActiveUsers()
+  {
+      return await _context.Users
+          .Where(u => !u.IsDeleted) // Manual filter, nên dùng global query filter
+          .ToListAsync();
+  }
+  
+  // ❌ Sai: Không dispose DbContext
+  public class UserService
+  {
+      private readonly QAgentDbContext _context = new QAgentDbContext();
+      // Không implement IDisposable, memory leak
+  }
+</example>

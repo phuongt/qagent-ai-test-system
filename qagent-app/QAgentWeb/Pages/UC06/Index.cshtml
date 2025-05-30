@@ -1,0 +1,352 @@
+@page
+@model QAgentWeb.Pages.UC06.IndexModel
+@{
+    ViewData["Title"] = "UC06 - Xác nhận và chỉnh sửa checklist";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">✏️ Xác nhận và Chỉnh sửa Checklist</h1>
+            <p class="text-gray-600 mt-2">Human-in-the-loop review và customization cho AI-generated checklists</p>
+        </div>
+        <div class="flex space-x-3">
+            <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition duration-200">
+                <i class="fas fa-check-double mr-2"></i>Bulk Approve
+            </button>
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition duration-200">
+                <i class="fas fa-download mr-2"></i>Export Approved
+            </button>
+        </div>
+    </div>
+
+    <!-- Workflow Status -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <span class="text-sm font-medium text-gray-700">Human Review Workflow</span>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-2">Active</span>
+            </div>
+            <div class="text-sm text-gray-500">5 reviewers online • Avg review time: 12 min</div>
+        </div>
+    </div>
+
+    <!-- Review Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-blue-600">18</div>
+            <div class="text-sm text-gray-600">Pending Review</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-green-600">12</div>
+            <div class="text-sm text-gray-600">Approved</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-red-600">3</div>
+            <div class="text-sm text-gray-600">Rejected</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-yellow-600">7</div>
+            <div class="text-sm text-gray-600">Need Revision</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-purple-600">94%</div>
+            <div class="text-sm text-gray-600">Review Efficiency</div>
+        </div>
+    </div>
+
+    <!-- Review Assignment & Routing -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 Intelligent Review Assignment</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Auto-assign by</label>
+                <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option>Expertise Level</option>
+                    <option>Workload Balance</option>
+                    <option>Domain Knowledge</option>
+                    <option>Random</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Priority Filter</label>
+                <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option>High Priority First</option>
+                    <option>Quality Score Desc</option>
+                    <option>Creation Date</option>
+                    <option>Complexity</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Review Type</label>
+                <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option>Full Review</option>
+                    <option>Quick Review</option>
+                    <option>Technical Review</option>
+                    <option>Quality Check</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                    <i class="fas fa-route mr-2"></i>Apply Routing
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checklist Review Queue -->
+    <div class="space-y-6">
+        <!-- High Priority Review Item -->
+        <div class="bg-white rounded-lg shadow-md border-l-4 border-red-500 hover:shadow-lg transition duration-200">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">Payment Gateway Checklist</h3>
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full ml-3">High Priority</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">Pending Review</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">Critical security checklist cần review urgent - Website E-commerce</p>
+                        <div class="flex items-center mt-2 text-sm text-gray-500">
+                            <span>Assigned: QA Lead</span>
+                            <span class="mx-2">•</span>
+                            <span>Due: 2 hours</span>
+                            <span class="mx-2">•</span>
+                            <span>Quality Score: 91</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-red-600">HIGH</div>
+                        <div class="text-xs text-gray-500">Priority</div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-gray-800 mb-2">📋 Review Checklist Summary</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Total Items:</span>
+                            <span class="font-semibold ml-1">42</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">AI Confidence:</span>
+                            <span class="font-semibold ml-1">89%</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Duplicates Found:</span>
+                            <span class="font-semibold ml-1 text-orange-600">3</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Coverage:</span>
+                            <span class="font-semibold ml-1">95%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review Actions & Tools -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-edit mr-2"></i>Start Review
+                    </button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-eye mr-2"></i>Preview Items
+                    </button>
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-comments mr-2"></i>Add Comments
+                    </button>
+                    <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-history mr-2"></i>View History
+                    </button>
+                    <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-user-plus mr-2"></i>Reassign
+                    </button>
+                </div>
+
+                <!-- Collaboration Section -->
+                <div class="border-t pt-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-users mr-2"></i>
+                            <span>3 reviewers assigned • 2 comments • Last activity: 5 min ago</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="text-green-600 hover:text-green-700">
+                                <i class="fas fa-check-circle text-lg"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-700">
+                                <i class="fas fa-times-circle text-lg"></i>
+                            </button>
+                            <button class="text-blue-600 hover:text-blue-700">
+                                <i class="fas fa-share-alt text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medium Priority Review Item -->
+        <div class="bg-white rounded-lg shadow-md border-l-4 border-yellow-500 hover:shadow-lg transition duration-200">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">User Profile Checklist</h3>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full ml-3">Medium Priority</span>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-2">In Review</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">Đang được review bởi Senior QA - Mobile App Banking</p>
+                        <div class="flex items-center mt-2 text-sm text-gray-500">
+                            <span>Assigned: Senior QA</span>
+                            <span class="mx-2">•</span>
+                            <span>Progress: 60%</span>
+                            <span class="mx-2">•</span>
+                            <span>Quality Score: 87</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-yellow-600">MED</div>
+                        <div class="text-xs text-gray-500">Priority</div>
+                    </div>
+                </div>
+
+                <!-- Review Progress -->
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span>Review Progress</span>
+                        <span>24/40 items reviewed</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 60%"></div>
+                    </div>
+                </div>
+
+                <!-- Current Review Status -->
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-edit text-blue-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium text-blue-800">Currently being reviewed by John Doe</div>
+                            <div class="text-sm text-blue-600">Started 45 minutes ago • Estimated completion: 30 min</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-eye mr-2"></i>View Progress
+                    </button>
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-comment mr-2"></i>Real-time Chat
+                    </button>
+                    <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-hand-paper mr-2"></i>Take Over
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approved Item -->
+        <div class="bg-white rounded-lg shadow-md border-l-4 border-green-500 hover:shadow-lg transition duration-200">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">Dashboard Analytics Checklist</h3>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-3">Low Priority</span>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-2">Approved</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">Completed review với minor revisions - CRM System</p>
+                        <div class="flex items-center mt-2 text-sm text-gray-500">
+                            <span>Reviewed by: QA Specialist</span>
+                            <span class="mx-2">•</span>
+                            <span>Approved: 2 hours ago</span>
+                            <span class="mx-2">•</span>
+                            <span>Final Score: 96</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-green-600">✓</div>
+                        <div class="text-xs text-gray-500">Approved</div>
+                    </div>
+                </div>
+
+                <!-- Approval Summary -->
+                <div class="bg-green-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-green-800 mb-2">✅ Approval Summary</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                            <span class="text-green-700">Items Approved:</span>
+                            <span class="font-semibold ml-1">36/38</span>
+                        </div>
+                        <div>
+                            <span class="text-green-700">Revisions Made:</span>
+                            <span class="font-semibold ml-1">2</span>
+                        </div>
+                        <div>
+                            <span class="text-green-700">Review Time:</span>
+                            <span class="font-semibold ml-1">23 min</span>
+                        </div>
+                        <div>
+                            <span class="text-green-700">Quality Score:</span>
+                            <span class="font-semibold ml-1">96%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-download mr-2"></i>Export Checklist
+                    </button>
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-rocket mr-2"></i>Generate Test Cases
+                    </button>
+                    <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-history mr-2"></i>View Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collaboration Tools -->
+    <div class="mt-8 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg p-6 text-white">
+        <h3 class="text-xl font-semibold mb-4">🤝 Real-time Collaboration Tools</h3>
+        <p class="mb-4">Collaborative review features cho team efficiency</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                <h4 class="font-medium mb-2">💬 Live Comments</h4>
+                <p class="text-sm opacity-90">Real-time commenting và threaded discussions</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                <h4 class="font-medium mb-2">🔄 Version Control</h4>
+                <p class="text-sm opacity-90">Track all changes với complete audit trail</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                <h4 class="font-medium mb-2">🔔 Smart Notifications</h4>
+                <p class="text-sm opacity-90">Intelligent notifications cho workflow events</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Real-time collaboration features
+function initializeCollaboration() {
+    // TODO: Initialize SignalR for real-time collaboration
+    console.log('Collaboration features initialized');
+}
+
+// Review workflow automation
+function autoAssignReviews() {
+    // TODO: Implement auto-assignment logic
+    alert('Auto-assignment feature will be implemented');
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCollaboration();
+});
+</script> 

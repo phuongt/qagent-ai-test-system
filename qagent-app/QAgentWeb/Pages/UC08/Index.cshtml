@@ -1,0 +1,298 @@
+@page
+@model QAgentWeb.Pages.UC08.IndexModel
+@{
+    ViewData["Title"] = "UC08 - Export và quản lý test case";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📊 Export và Quản lý Test Case</h1>
+            <p class="text-gray-600 mt-2">Export test case ra nhiều định dạng và quản lý lifecycle của test execution.</p>
+        </div>
+        <button class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition duration-200">
+            <i class="fas fa-download mr-2"></i>Bulk Export
+        </button>
+    </div>
+
+    <!-- Export Engine Status -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <span class="text-sm font-medium text-gray-700">Export Engine</span>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-2">Active</span>
+            </div>
+            <div class="text-sm text-gray-500">Excel • PDF • CSV • JSON • Last export: 2 mins ago</div>
+        </div>
+    </div>
+
+    <!-- Export Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-green-600">342</div>
+            <div class="text-sm text-gray-600">Total Exports</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-blue-600">1,847</div>
+            <div class="text-sm text-gray-600">Test Cases Exported</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-purple-600">24</div>
+            <div class="text-sm text-gray-600">Active Templates</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-orange-600">8</div>
+            <div class="text-sm text-gray-600">Scheduled Jobs</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-red-600">98%</div>
+            <div class="text-sm text-gray-600">Success Rate</div>
+        </div>
+    </div>
+
+    <!-- Quick Export Actions -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">🚀 Quick Export Actions</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <button class="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition duration-200">
+                <i class="fas fa-file-excel text-xl mr-3"></i>
+                <div class="text-left">
+                    <div class="font-medium">Excel Export</div>
+                    <div class="text-xs opacity-90">Structured data</div>
+                </div>
+            </button>
+            <button class="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg transition duration-200">
+                <i class="fas fa-file-pdf text-xl mr-3"></i>
+                <div class="text-left">
+                    <div class="font-medium">PDF Export</div>
+                    <div class="text-xs opacity-90">Print-ready</div>
+                </div>
+            </button>
+            <button class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition duration-200">
+                <i class="fas fa-file-csv text-xl mr-3"></i>
+                <div class="text-left">
+                    <div class="font-medium">CSV Export</div>
+                    <div class="text-xs opacity-90">Raw data</div>
+                </div>
+            </button>
+            <button class="flex items-center justify-center bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-3 rounded-lg transition duration-200">
+                <i class="fas fa-code text-xl mr-3"></i>
+                <div class="text-left">
+                    <div class="font-medium">JSON Export</div>
+                    <div class="text-xs opacity-90">API ready</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Export History & Management -->
+    <div class="space-y-6">
+        <!-- Export Item 1: Completed -->
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 border-l-4 border-green-500">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">Login Test Suite - Excel Export</h3>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-3">Completed</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">Project: Mobile App Banking • Export: 28/05/2025 14:23</p>
+                        <div class="flex items-center mt-2 text-sm text-gray-500">
+                            <span>45 Test Cases</span>
+                            <span class="mx-2">•</span>
+                            <span>Template: Standard Excel</span>
+                            <span class="mx-2">•</span>
+                            <span>Size: 2.4 MB</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-green-600">✓</div>
+                        <div class="text-xs text-gray-500">Ready</div>
+                    </div>
+                </div>
+
+                <div class="bg-green-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-green-800 mb-2">📋 Export Summary</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Format:</span>
+                            <span class="font-semibold ml-1">Excel (.xlsx)</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Duration:</span>
+                            <span class="font-semibold ml-1">12s</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Template:</span>
+                            <span class="font-semibold ml-1">Standard</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Quality:</span>
+                            <span class="font-semibold ml-1 text-green-600">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-download mr-2"></i>Download
+                    </button>
+                    <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-eye mr-2"></i>Preview
+                    </button>
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-share mr-2"></i>Share Link
+                    </button>
+                    <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-redo mr-2"></i>Re-export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Item 2: In Progress -->
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 border-l-4 border-yellow-500">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">E-commerce Full Suite - PDF Export</h3>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full ml-3">Exporting... (73%)</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">Project: Website E-commerce • Started: 3 mins ago</p>
+                        <div class="mt-2">
+                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                <span>Export Progress</span>
+                                <span>73% (156/214 test cases)</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-yellow-500 h-2 rounded-full transition-all duration-300" style="width: 73%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <i class="fas fa-spinner fa-spin text-3xl text-yellow-500"></i>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button class="bg-gray-400 cursor-not-allowed text-white px-4 py-2 rounded" disabled>
+                        <i class="fas fa-spinner fa-spin mr-2"></i>Exporting...
+                    </button>
+                    <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-stop mr-2"></i>Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Item 3: Scheduled -->
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 border-l-4 border-blue-500">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">Weekly Report - Multi-format Export</h3>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-3">Scheduled</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">All Projects • Scheduled: Every Monday 09:00</p>
+                        <div class="flex items-center mt-2 text-sm text-gray-500">
+                            <span>Formats: Excel + PDF + CSV</span>
+                            <span class="mx-2">•</span>
+                            <span>Next run: Monday, 02/06/2025</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-blue-600">⏰</div>
+                        <div class="text-xs text-gray-500">Scheduled</div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-blue-800 mb-2">⚙️ Schedule Configuration</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Frequency:</span>
+                            <span class="font-semibold ml-1">Weekly</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Recipients:</span>
+                            <span class="font-semibold ml-1">5 users</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Auto-cleanup:</span>
+                            <span class="font-semibold ml-1">30 days</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-play mr-2"></i>Run Now
+                    </button>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-edit mr-2"></i>Edit Schedule
+                    </button>
+                    <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-pause mr-2"></i>Pause
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Templates & Advanced Features -->
+    <div class="mt-8 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg p-6 text-white">
+        <h3 class="text-xl font-semibold mb-4">🛠️ Export Templates & Advanced Features</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white bg-opacity-20 rounded-lg p-4 hover:bg-opacity-30 transition duration-200">
+                <h4 class="font-medium mb-2"><i class="fas fa-magic mr-2"></i>Custom Templates</h4>
+                <p class="text-sm opacity-90">Tạo và quản lý template export tùy chỉnh.</p>
+                <button class="mt-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-sm">
+                    Quản lý Templates
+                </button>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-lg p-4 hover:bg-opacity-30 transition duration-200">
+                <h4 class="font-medium mb-2"><i class="fas fa-clock mr-2"></i>Scheduled Exports</h4>
+                <p class="text-sm opacity-90">Tự động hóa export theo lịch trình.</p>
+                <button class="mt-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-sm">
+                    Cấu hình Schedule
+                </button>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-lg p-4 hover:bg-opacity-30 transition duration-200">
+                <h4 class="font-medium mb-2"><i class="fas fa-chart-bar mr-2"></i>Export Analytics</h4>
+                <p class="text-sm opacity-90">Phân tích hiệu suất và thống kê export.</p>
+                <button class="mt-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-sm">
+                    Xem Analytics
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script for UC08 - Export and Test Case Management
+document.addEventListener('DOMContentLoaded', function() {
+    // TODO: Add JS logic for export operations, progress updates, template management etc.
+    console.log('UC08 - Export and Test Case Management page loaded.');
+    
+    // Mock real-time progress updates
+    updateExportProgress();
+});
+
+function updateExportProgress() {
+    // TODO: Implement real-time progress updates for exports
+    // WebSocket or polling for progress updates
+}
+
+function downloadExport(exportId) {
+    // TODO: Implement download functionality
+    console.log('Downloading export:', exportId);
+}
+
+function cancelExport(exportId) {
+    // TODO: Implement cancel export functionality
+    console.log('Cancelling export:', exportId);
+}
+</script> 

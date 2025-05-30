@@ -1,0 +1,224 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<QAgentWeb.Resources.SharedResource> Localizer
+@using System.Globalization
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentCulture.TwoLetterISOLanguageName">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "QAgent - AI-Powered Test Management System")</title>
+    <meta name="description" content="@(ViewData["Description"] ?? "QAgent là hệ thống quản lý nhiệm vụ thông minh với AI")" />
+    <meta name="keywords" content="@(ViewData["Keywords"] ?? "QAgent, AI, Test Management, ASP.NET Core")" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)" />
+    <meta property="og:title" content="@(ViewData["Title"] ?? "QAgent")" />
+    <meta property="og:description" content="@(ViewData["Description"] ?? "QAgent là hệ thống quản lý nhiệm vụ thông minh với AI")" />
+    <meta property="og:image" content="@(Context.Request.Scheme)://@(Context.Request.Host)/images/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)" />
+    <meta property="twitter:title" content="@(ViewData["Title"] ?? "QAgent")" />
+    <meta property="twitter:description" content="@(ViewData["Description"] ?? "QAgent là hệ thống quản lý nhiệm vụ thông minh với AI")" />
+    <meta property="twitter:image" content="@(Context.Request.Scheme)://@(Context.Request.Host)/images/og-image.jpg" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)" />
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Gradient Background Override -->
+    <style>
+        * {
+            box-sizing: border-box !important;
+        }
+        html {
+            width: 100vw !important;
+            height: 100vh !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        body {
+            width: 100vw !important;
+            height: 100vh !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+        }
+        body.bg-gray-50 {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+        }
+        main {
+            background: transparent !important;
+            height: calc(100vh - 112px) !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .container {
+            max-width: 100% !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            margin: 0 auto !important;
+        }
+        header {
+            background: rgba(255, 255, 255, 0.25) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+            height: 64px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        footer {
+            background: rgba(255, 255, 255, 0.25) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+            height: 48px !important;
+            padding: 0.75rem 0 !important;
+            margin: 0 !important;
+        }
+    </style>
+    
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="bg-gray-50">
+    <header>
+        <nav class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a asp-page="/Index" class="text-xl font-bold text-primary-600">QAgent</a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a asp-page="/Index" class="text-gray-700 hover:text-primary-600 transition-colors">@Localizer["Home"]</a>
+                    <a asp-page="/UC01/Index" class="text-gray-700 hover:text-primary-600 transition-colors">@Localizer["Tasks"]</a>
+                    
+                    <!-- Features Navigation -->
+                    <div class="relative group">
+                        <button class="text-gray-700 hover:text-primary-600 transition-colors flex items-center">
+                            Features
+                            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="absolute top-full left-0 mt-1 w-56 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="py-1">
+                                <a asp-page="/UC01/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    📤 Upload & Quản lý dữ liệu
+                                </a>
+                                <a asp-page="/UC02/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    🔍 Phân tích ảnh UI
+                                </a>
+                                <a asp-page="/UC03/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    🎯 ISTQB Rules Management
+                                </a>
+                                <a asp-page="/UC04/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    🖥️ Screen Management
+                                </a>
+                                <a asp-page="/UC05/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    🤖 Sinh Checklist Tự động
+                                </a>
+                                <a asp-page="/UC06/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    ✏️ Xác nhận & Chỉnh sửa
+                                </a>
+                                <a asp-page="/UC07/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    🚀 Sinh Test Case
+                                </a>
+                                <a asp-page="/UC08/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    📊 Export & Quản lý
+                                </a>
+                                <a asp-page="/UC09/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    🧠 Gợi ý Vector DB
+                                </a>
+                                <a asp-page="/UC10/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    🎯 Học từ Feedback
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Navigation -->
+                    <div class="relative group">
+                        <button class="text-gray-700 hover:text-primary-600 transition-colors flex items-center">
+                            Admin
+                            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="py-1">
+                                <a asp-page="/Admin/DatabaseMigration" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    Database Migration
+                                </a>
+                                <a asp-page="/Admin/SqlExecutor" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    SQL Executor
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Language Selector -->
+                    <div class="flex items-center">
+                        <a asp-route-culture="en" class="text-sm text-gray-600 hover:text-primary-600">EN</a>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-primary-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200">
+                <div class="py-4 space-y-2">
+                    <a asp-page="/Index" class="block text-gray-700 hover:text-primary-600 transition-colors">@Localizer["Home"]</a>
+                    <a asp-page="/UC01/Index" class="block text-gray-700 hover:text-primary-600 transition-colors">@Localizer["Tasks"]</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer>
+        <div class="container mx-auto px-4">
+            <div class="text-center text-gray-600">
+                &copy; @DateTime.Now.Year - QAgent - AI Test Management System
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html> 

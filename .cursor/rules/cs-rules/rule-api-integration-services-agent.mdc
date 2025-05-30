@@ -1,0 +1,230 @@
+---
+description: 
+globs: *.cs
+alwaysApply: false
+---
+# API Integration Services cho ASP.NET Core
+
+## Critical Rules
+
+- **Service Wrapper Pattern**: Tạo wrapper services trong folder `Services/` cho mỗi API
+- **Interface Segregation**: Mỗi service có interface riêng (IOpenAIService, IGoogleDriveService)
+- **Configuration**: Sử dụng IOptions<T> pattern cho API keys và settings
+- **Error Handling**: Implement proper exception handling và logging
+- **Async/Await**: Tất cả API calls phải async
+- **HttpClient**: Sử dụng IHttpClientFactory cho HTTP calls
+- **Authentication**: Secure storage cho API keys trong appsettings hoặc Azure Key Vault
+- **Rate Limiting**: Implement rate limiting cho API calls
+- **Dependency Injection**: Đăng ký services trong Program.cs
+- **Response Models**: Tạo DTOs cho API responses
+
+## Examples
+
+<example>
+  // ✅ Correct OpenAI Service Implementation
+  // Services/IOpenAIService.cs
+  public interface IOpenAIService
+  {
+      Task<OpenAIResponse> GenerateTextAsync(string prompt, CancellationToken cancellationToken = default);
+      Task<OpenAIResponse> GenerateImageAsync(string description, CancellationToken cancellationToken = default);
+  }
+  
+  // Services/OpenAIService.cs
+  public class OpenAIService : IOpenAIService
+  {
+      private readonly HttpClient _httpClient;
+      private readonly IOptions<OpenAISettings> _settings;
+      private readonly ILogger<OpenAIService> _logger;
+      
+      public OpenAIService(
+          IHttpClientFactory httpClientFactory,
+          IOptions<OpenAISettings> settings,
+          ILogger<OpenAIService> logger)
+      {
+          _httpClient = httpClientFactory.CreateClient("OpenAI");
+          _settings = settings;
+          _logger = logger;
+      }
+      
+      public async Task<OpenAIResponse> GenerateTextAsync(string prompt, CancellationToken cancellationToken = default)
+      {
+          try
+          {
+              var request = new OpenAIRequest { Prompt = prompt, MaxTokens = 150 };
+              var json = JsonSerializer.Serialize(request);
+              var content = new StringContent(json, Encoding.UTF8, "application/json");
+              
+              var response = await _httpClient.PostAsync("/v1/completions", content, cancellationToken);
+              response.EnsureSuccessStatusCode();
+              
+              var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
+              return JsonSerializer.Deserialize<OpenAIResponse>(responseJson);
+          }
+          catch (HttpRequestException ex)
+          {
+              _logger.LogError(ex, "Error calling OpenAI API for prompt: {Prompt}", prompt);
+              throw new OpenAIException("Failed to generate text", ex);
+          }
+      }
+  }
+  
+  // ✅ Correct Google Drive Service
+  public class GoogleDriveService : IGoogleDriveService
+  {
+      private readonly DriveService _driveService;
+      private readonly ILogger<GoogleDriveService> _logger;
+      
+      public GoogleDriveService(IOptions<GoogleDriveSettings> settings, ILogger<GoogleDriveService> logger)
+      {
+          var credential = GoogleCredential.FromFile(settings.Value.ServiceAccountKeyPath)
+              .CreateScoped(DriveService.Scope.Drive);
+          
+          _driveService = new DriveService(new BaseClientService.Initializer()
+          {
+              HttpClientInitializer = credential,
+              ApplicationName = settings.Value.ApplicationName
+          });
+          _logger = logger;
+      }
+      
+      public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string mimeType)
+      {
+          try
+          {
+              var fileMetadata = new Google.Apis.Drive.v3.Data.File()
+              {
+                  Name = fileName
+              };
+              
+              var request = _driveService.Files.Create(fileMetadata, fileStream, mimeType);
+              request.Fields = "id";
+              
+              var file = await request.UploadAsync();
+              return request.ResponseBody?.Id;
+          }
+          catch (Exception ex)
+          {
+              _logger.LogError(ex, "Error uploading file {FileName} to Google Drive", fileName);
+              throw;
+          }
+      }
+  }
+  
+  // ✅ Correct Excel Export Service
+  public class ExcelExportService : IExcelExportService
+  {
+      public byte[] ExportToExcel<T>(IEnumerable<T> data, string sheetName = "Sheet1")
+      {
+          using var workbook = new XLWorkbook();
+          var worksheet = workbook.Worksheets.Add(sheetName);
+          
+          var properties = typeof(T).GetProperties();
+          
+          // Headers
+          for (int i = 0; i < properties.Length; i++)
+          {
+              worksheet.Cell(1, i + 1).Value = properties[i].Name;
+              worksheet.Cell(1, i + 1).Style.Font.Bold = true;
+          }
+          
+          // Data
+          var row = 2;
+          foreach (var item in data)
+          {
+              for (int i = 0; i < properties.Length; i++)
+              {
+                  var value = properties[i].GetValue(item);
+                  worksheet.Cell(row, i + 1).Value = value?.ToString() ?? "";
+              }
+              row++;
+          }
+          
+          worksheet.ColumnsUsed().AdjustToContents();
+          
+          using var stream = new MemoryStream();
+          workbook.SaveAs(stream);
+          return stream.ToArray();
+      }
+  }
+  
+  // ✅ Correct Program.cs Registration
+  // Configuration
+  builder.Services.Configure<OpenAISettings>(builder.Configuration.GetSection("OpenAI"));
+  builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDrive"));
+  
+  // HttpClient Factory
+  builder.Services.AddHttpClient("OpenAI", client =>
+  {
+      client.BaseAddress = new Uri("https://api.openai.com");
+      client.DefaultRequestHeaders.Add("Authorization", $"Bearer {builder.Configuration["OpenAI:ApiKey"]}");
+  });
+  
+  // Services
+  builder.Services.AddScoped<IOpenAIService, OpenAIService>();
+  builder.Services.AddScoped<IGoogleDriveService, GoogleDriveService>();
+  builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
+</example>
+
+<example type="invalid">
+  // ❌ Sai: Direct API calls trong Page Model
+  public class IndexModel : PageModel
+  {
+      public async Task OnGetAsync()
+      {
+          var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer sk-...");
+          var response = await client.PostAsync("https://api.openai.com/v1/completions", content);
+          // Nên sử dụng service wrapper
+      }
+  }
+  
+  // ❌ Sai: Hardcoded API keys
+  public class OpenAIService
+  {
+      private const string ApiKey = "sk-1234567890abcdef"; // Never hardcode!
+      
+      public async Task<string> GenerateText(string prompt)
+      {
+          // Không secure, không configurable
+      }
+  }
+  
+  // ❌ Sai: Không async/await
+  public string GenerateText(string prompt)
+  {
+      var result = _httpClient.PostAsync(url, content).Result; // Blocking call
+      return result.Content.ReadAsStringAsync().Result;
+  }
+  
+  // ❌ Sai: Không error handling
+  public async Task<OpenAIResponse> GenerateTextAsync(string prompt)
+  {
+      var response = await _httpClient.PostAsync(url, content);
+      // Không check status code
+      var json = await response.Content.ReadAsStringAsync();
+      return JsonSerializer.Deserialize<OpenAIResponse>(json);
+      // Không try-catch
+  }
+  
+  // ❌ Sai: Không sử dụng IOptions pattern
+  public class OpenAIService
+  {
+      private readonly string _apiKey;
+      
+      public OpenAIService()
+      {
+          _apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+          // Nên inject IOptions<OpenAISettings>
+      }
+  }
+  
+  // ❌ Sai: Không dispose resources
+  public byte[] ExportToExcel<T>(IEnumerable<T> data)
+  {
+      var workbook = new XLWorkbook(); // Không using statement
+      var worksheet = workbook.Worksheets.Add("Sheet1");
+      var stream = new MemoryStream();
+      workbook.SaveAs(stream);
+      return stream.ToArray(); // Memory leak
+  }
+</example>

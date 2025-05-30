@@ -1,0 +1,292 @@
+@page
+@model QAgentWeb.Pages.UC09.IndexModel
+@{
+    ViewData["Title"] = "UC09 - Gợi ý từ Vector Database";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">🧠 Gợi ý từ Vector Database</h1>
+            <p class="text-gray-600 mt-2">Semantic search và recommendation engine cho test case tương tự từ historical data.</p>
+        </div>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition duration-200">
+            <i class="fas fa-brain mr-2"></i>Reindex Vector DB
+        </button>
+    </div>
+
+    <!-- Vector DB Status -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <span class="text-sm font-medium text-gray-700">Vector Database Engine</span>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-2">Connected</span>
+            </div>
+            <div class="text-sm text-gray-500">Engine: Pinecone • Embeddings: 45,892 • Avg Query: 127ms</div>
+        </div>
+    </div>
+
+    <!-- Search Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-blue-600">45,892</div>
+            <div class="text-sm text-gray-600">Total Embeddings</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-green-600">1,247</div>
+            <div class="text-sm text-gray-600">Successful Recommendations</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-purple-600">87%</div>
+            <div class="text-sm text-gray-600">Similarity Accuracy</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-orange-600">127ms</div>
+            <div class="text-sm text-gray-600">Avg Query Time</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold text-red-600">234</div>
+            <div class="text-sm text-gray-600">Today's Searches</div>
+        </div>
+    </div>
+
+    <!-- Semantic Search Interface -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">🔍 Semantic Search for Similar Test Cases</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nhập mô tả test case hoặc requirement</label>
+                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 h-24" 
+                    placeholder="Ví dụ: Test đăng nhập với email và password sai nhiều lần, kiểm tra tính năng lock account..."></textarea>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Project Context</label>
+                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        <option>Tất cả Projects</option>
+                        <option>Website E-commerce</option>
+                        <option>Mobile App Banking</option>
+                        <option>CRM System</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Similarity Threshold</label>
+                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        <option>High Similarity (>0.85)</option>
+                        <option>Medium Similarity (>0.70)</option>
+                        <option>Low Similarity (>0.50)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Results</label>
+                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        <option>Top 5</option>
+                        <option>Top 10</option>
+                        <option>Top 20</option>
+                    </select>
+                </div>
+            </div>
+            <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition duration-200">
+                <i class="fas fa-search mr-2"></i>Tìm kiếm Test Cases Tương tự
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Results / Recommendations -->
+    <div class="space-y-6">
+        <!-- Search Result 1: High Similarity -->
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 border-l-4 border-green-500">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">Login Authentication with Account Lockout</h3>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-3">92% Similarity</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">Project: Mobile App Banking • Category: Security Testing • Last Updated: 25/05/2025</p>
+                        <div class="flex items-center mt-2 text-sm text-gray-500">
+                            <span>Test Steps: 15</span>
+                            <span class="mx-2">•</span>
+                            <span>Success Rate: 94%</span>
+                            <span class="mx-2">•</span>
+                            <span>Reused: 8 times</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-green-600">92%</div>
+                        <div class="text-xs text-gray-500">Similarity</div>
+                    </div>
+                </div>
+
+                <div class="bg-green-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-green-800 mb-2">📋 Test Case Preview</h4>
+                    <p class="text-sm text-gray-700 mb-2"><strong>Objective:</strong> Verify login functionality with incorrect credentials and account lockout mechanism</p>
+                    <p class="text-sm text-gray-700 mb-2"><strong>Preconditions:</strong> User account exists, lockout threshold set to 3 attempts</p>
+                    <p class="text-sm text-gray-700"><strong>Test Steps:</strong> Enter wrong password 3 times → Verify account locked → Wait cooldown period → Verify unlock...</p>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-copy mr-2"></i>Use as Template
+                    </button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-eye mr-2"></i>View Full Test Case
+                    </button>
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-code-branch mr-2"></i>Create Variant
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Result 2: Medium Similarity -->
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 border-l-4 border-yellow-500">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">User Session Management & Password Validation</h3>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full ml-3">78% Similarity</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">Project: Website E-commerce • Category: Functional Testing • Last Updated: 22/05/2025</p>
+                        <div class="flex items-center mt-2 text-sm text-gray-500">
+                            <span>Test Steps: 12</span>
+                            <span class="mx-2">•</span>
+                            <span>Success Rate: 89%</span>
+                            <span class="mx-2">•</span>
+                            <span>Reused: 5 times</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-yellow-600">78%</div>
+                        <div class="text-xs text-gray-500">Similarity</div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-yellow-800 mb-2">📋 Test Case Preview</h4>
+                    <p class="text-sm text-gray-700 mb-2"><strong>Objective:</strong> Validate user session handling and password complexity requirements</p>
+                    <p class="text-sm text-gray-700 mb-2"><strong>Preconditions:</strong> User registration flow available, password policy configured</p>
+                    <p class="text-sm text-gray-700"><strong>Test Steps:</strong> Register with weak password → Verify validation → Login → Check session timeout...</p>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-copy mr-2"></i>Use as Template
+                    </button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-eye mr-2"></i>View Full Test Case
+                    </button>
+                    <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-star mr-2"></i>Add to Favorites
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Result 3: Related -->
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 border-l-4 border-blue-500">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">Two-Factor Authentication Flow</h3>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-3">65% Similarity</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">Project: CRM System • Category: Security Testing • Last Updated: 20/05/2025</p>
+                        <div class="flex items-center mt-2 text-sm text-gray-500">
+                            <span>Test Steps: 18</span>
+                            <span class="mx-2">•</span>
+                            <span>Success Rate: 96%</span>
+                            <span class="mx-2">•</span>
+                            <span>Reused: 12 times</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-blue-600">65%</div>
+                        <div class="text-xs text-gray-500">Similarity</div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-blue-800 mb-2">📋 Test Case Preview</h4>
+                    <p class="text-sm text-gray-700 mb-2"><strong>Objective:</strong> Verify 2FA implementation with SMS and authenticator app</p>
+                    <p class="text-sm text-gray-700 mb-2"><strong>Preconditions:</strong> 2FA enabled for user, mobile number verified</p>
+                    <p class="text-sm text-gray-700"><strong>Test Steps:</strong> Login with credentials → Receive 2FA code → Enter correct/incorrect codes → Verify access...</p>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-copy mr-2"></i>Use as Template
+                    </button>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-eye mr-2"></i>View Full Test Case
+                    </button>
+                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>Combine with Current
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Features -->
+    <div class="mt-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 text-white">
+        <h3 class="text-xl font-semibold mb-4">🚀 Advanced Vector Database Features</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white bg-opacity-20 rounded-lg p-4 hover:bg-opacity-30 transition duration-200">
+                <h4 class="font-medium mb-2"><i class="fas fa-sitemap mr-2"></i>Clustering Analysis</h4>
+                <p class="text-sm opacity-90">Phân tích clusters của test cases để tìm patterns.</p>
+                <button class="mt-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-sm">
+                    View Clusters
+                </button>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-lg p-4 hover:bg-opacity-30 transition duration-200">
+                <h4 class="font-medium mb-2"><i class="fas fa-chart-line mr-2"></i>Similarity Trends</h4>
+                <p class="text-sm opacity-90">Theo dõi xu hướng và hiệu quả của recommendations.</p>
+                <button class="mt-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-sm">
+                    View Analytics
+                </button>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-lg p-4 hover:bg-opacity-30 transition duration-200">
+                <h4 class="font-medium mb-2"><i class="fas fa-cogs mr-2"></i>Embedding Management</h4>
+                <p class="text-sm opacity-90">Quản lý và tối ưu hóa vector embeddings.</p>
+                <button class="mt-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-sm">
+                    Manage Embeddings
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script for UC09 - Vector Database Recommendations
+document.addEventListener('DOMContentLoaded', function() {
+    // TODO: Add JS logic for semantic search, vector operations, real-time suggestions etc.
+    console.log('UC09 - Vector Database Recommendations page loaded.');
+    
+    // Mock real-time similarity scoring
+    initializeSimilarityScoring();
+});
+
+function initializeSimilarityScoring() {
+    // TODO: Implement real-time similarity scoring updates
+    // WebSocket connection for live embedding updates
+}
+
+function performSemanticSearch() {
+    // TODO: Implement semantic search functionality
+    console.log('Performing semantic search...');
+}
+
+function useAsTemplate(testCaseId) {
+    // TODO: Implement template usage functionality
+    console.log('Using test case as template:', testCaseId);
+}
+
+function createVariant(testCaseId) {
+    // TODO: Implement variant creation functionality
+    console.log('Creating variant for test case:', testCaseId);
+}
+</script> 

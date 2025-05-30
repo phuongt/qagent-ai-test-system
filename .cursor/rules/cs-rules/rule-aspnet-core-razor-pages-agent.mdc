@@ -1,0 +1,99 @@
+---
+description: 
+globs: *.cshtml
+alwaysApply: false
+---
+# ASP.NET Core 8 Razor Pages + Tailwind CSS Development Rules
+
+## Critical Rules
+
+- **Project Structure**: Tổ chức theo use cases (UC01-UC10) trong folder `Pages/UC01/`, `Pages/UC02/`, etc.
+- **Razor Pages**: Mỗi use case có riêng Index.cshtml và Index.cshtml.cs
+- **Partial Views**: Component hóa UI bằng Partial Views trong `Pages/Shared/Components/`
+- **Tailwind CSS**: Sử dụng Tailwind classes, build qua npm script `build:css`
+- **SEO Optimization**: Mỗi page phải có ViewData["Title"], ViewData["Description"], og:tags
+- **Localization**: Sử dụng resx files trong folder `Resources/`, inject IStringLocalizer
+- **Services**: Tạo wrapper services cho OpenAI, Google Drive, ClosedXML trong folder `Services/`
+- **DI Registration**: Đăng ký tất cả services trong Program.cs
+- **Culture Middleware**: Cấu hình RequestLocalizationOptions với supportedCultures
+- **Sitemap**: Tạo endpoint `/sitemap.xml` trả về XML cho SEO
+
+## Examples
+
+<example>
+  // ✅ Correct structure cho UC01
+  Pages/
+    UC01/
+      Index.cshtml
+      Index.cshtml.cs
+    Shared/
+      Components/
+        _Header.cshtml
+        _Card.cshtml
+      _Layout.cshtml
+  
+  // ✅ Correct Page Model
+  public class IndexModel : PageModel
+  {
+      private readonly IStringLocalizer<IndexModel> _localizer;
+      private readonly OpenAIService _openAIService;
+      
+      public IndexModel(IStringLocalizer<IndexModel> localizer, OpenAIService openAIService)
+      {
+          _localizer = localizer;
+          _openAIService = openAIService;
+      }
+      
+      public void OnGet()
+      {
+          ViewData["Title"] = _localizer["PageTitle"];
+          ViewData["Description"] = _localizer["PageDescription"];
+      }
+  }
+  
+  // ✅ Correct Razor Page với SEO
+  @page "/uc01"
+  @model UC01.IndexModel
+  @{
+      ViewData["Title"] = Model._localizer["UC01Title"];
+  }
+  
+  <div class="container mx-auto px-4 py-8">
+      <partial name="Components/_Header" />
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Tailwind CSS classes -->
+      </div>
+  </div>
+</example>
+
+<example type="invalid">
+  // ❌ Sai: Không tổ chức theo use cases
+  Pages/
+    Home/
+      Index.cshtml
+    About/
+      Index.cshtml
+  
+  // ❌ Sai: Không có SEO metadata
+  public void OnGet()
+  {
+      // Thiếu ViewData["Title"], ViewData["Description"]
+  }
+  
+  // ❌ Sai: Inline CSS thay vì Tailwind
+  <div style="margin: 20px; padding: 10px;">
+      <h1 style="color: blue;">Title</h1>
+  </div>
+  
+  // ❌ Sai: Không sử dụng localization
+  <h1>Hardcoded English Text</h1>
+  
+  // ❌ Sai: Direct API calls trong Page Model
+  public async Task OnGetAsync()
+  {
+      var client = new HttpClient();
+      var response = await client.GetAsync("https://api.openai.com/...");
+      // Nên sử dụng service wrapper
+  }
+</example>
+

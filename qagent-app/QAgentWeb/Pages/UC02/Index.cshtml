@@ -1,0 +1,503 @@
+@page
+@model QAgentWeb.Pages.UC02.IndexModel
+@using System.IO
+@using System.Linq
+
+@{
+    ViewData["Title"] = "UC02 - Phân tích ảnh UI và chuẩn hóa màn hình";
+    
+    // Helper function để kiểm tra file có phải là ảnh hợp lệ
+    bool IsValidImageFile(string filePath)
+    {
+        if (string.IsNullOrEmpty(filePath)) return false;
+        
+        var validExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tiff", ".svg" };
+        var extension = System.IO.Path.GetExtension(filePath).ToLowerInvariant();
+        
+        // Kiểm tra extension
+        if (!validExtensions.Contains(extension)) return false;
+        
+        // Kiểm tra file có tồn tại không (nếu là đường dẫn local)
+        if (!filePath.StartsWith("http") && !filePath.StartsWith("data:"))
+        {
+            var physicalPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", filePath.TrimStart('/'));
+            if (!System.IO.File.Exists(physicalPath)) return false;
+        }
+        
+        return true;
+    }
+}
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 2rem 1rem;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0 0 0.5rem 0;">Phân tích ảnh UI và chuẩn hóa màn hình</h1>
+            <p style="color: #6b7280; margin: 0;">Sử dụng AI để phân tích giao diện người dùng và chuẩn hóa màn hình</p>
+        </div>
+        <div>
+            @if (Model.IsAIServiceAvailable)
+            {
+                <span style="display: inline-flex; align-items: center; padding: 0.5rem 0.75rem; background-color: #dcfce7; color: #166534; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
+                    <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>AI Service Available
+                </span>
+            }
+            else
+            {
+                <span style="display: inline-flex; align-items: center; padding: 0.5rem 0.75rem; background-color: #fecaca; color: #991b1b; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
+                    <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem;"></i>AI Service Unavailable
+                </span>
+            }
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); padding: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #2563eb; margin-bottom: 0.5rem;">@Model.TotalScreens</div>
+            <div style="color: #6b7280; font-size: 0.875rem;">Tổng màn hình</div>
+        </div>
+        <div style="background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); padding: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #d97706; margin-bottom: 0.5rem;">@Model.PendingScreens</div>
+            <div style="color: #6b7280; font-size: 0.875rem;">Chờ phân tích</div>
+        </div>
+        <div style="background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); padding: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #ea580c; margin-bottom: 0.5rem;">@Model.ProcessingScreens</div>
+            <div style="color: #6b7280; font-size: 0.875rem;">Đang xử lý</div>
+        </div>
+        <div style="background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); padding: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #16a34a; margin-bottom: 0.5rem;">@Model.CompletedScreens</div>
+            <div style="color: #6b7280; font-size: 0.875rem;">Hoàn thành</div>
+        </div>
+        <div style="background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); padding: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #dc2626; margin-bottom: 0.5rem;">@Model.FailedScreens</div>
+            <div style="color: #6b7280; font-size: 0.875rem;">Thất bại</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div style="background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); padding: 1.5rem; margin-bottom: 1.5rem;">
+        <form method="get" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+            <div>
+                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Project</label>
+                <select name="projectId" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                    <option value="">Tất cả projects</option>
+                    @foreach (var project in Model.Projects)
+                    {
+                        <option value="@project.Id" selected="@(Model.SelectedProjectId == project.Id.ToString())">
+                            @project.Name
+                        </option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Trạng thái</label>
+                <select name="status" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Pending" selected="@(Model.SelectedStatus == "Pending")">Chờ phân tích</option>
+                    <option value="Processing" selected="@(Model.SelectedStatus == "Processing")">Đang xử lý</option>
+                    <option value="Completed" selected="@(Model.SelectedStatus == "Completed")">Hoàn thành</option>
+                    <option value="Failed" selected="@(Model.SelectedStatus == "Failed")">Thất bại</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Tìm kiếm</label>
+                <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tên màn hình, mô tả..." 
+                       style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+            </div>
+            <div>
+                <button type="submit" style="display: inline-flex; align-items: center; padding: 0.5rem 1rem; background-color: #2563eb; color: white; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer; font-size: 0.875rem;">
+                    <i class="fas fa-search" style="margin-right: 0.5rem;"></i>Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Screens Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        @if (Model.Screens.Any())
+        {
+            @foreach (var screen in Model.Screens)
+            {
+                <div style="background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); overflow: hidden; transition: all 0.2s;">
+                    <!-- Image Preview -->
+                    <div style="height: 12rem; background: #f3f4f6; position: relative;">
+                        @if (IsValidImageFile(screen.FilePath))
+                        {
+                            <div class="image-with-fallback">
+                                <img src="@screen.FilePath" alt="@screen.Name" 
+                                     onclick="showImageModal('@screen.FilePath', '@screen.Name')"
+                                     onerror="handleImageError(this)"
+                                     style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;">
+                                <!-- Fallback default image (shown when img fails to load) -->
+                                <div class="fallback default-image-placeholder" onclick="showDefaultImageModal('@screen.Name')">
+                                    <i class="fas fa-image"></i>
+                                    <span class="title">Image Not Available</span>
+                                    <span class="subtitle">Click to view details</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Default image placeholder -->
+                            <div class="default-image-placeholder" onclick="showDefaultImageModal('@screen.Name')">
+                                <i class="fas fa-image"></i>
+                                <span class="title">No Preview Available</span>
+                                <span class="subtitle">Click to view details</span>
+                            </div>
+                        }
+                        @{
+                            var statusStyle = screen.AnalysisStatus switch
+                            {
+                                "Pending" => "background-color: #fef3c7; color: #92400e;",
+                                "Processing" => "background-color: #fed7aa; color: #9a3412;",
+                                "Completed" => "background-color: #dcfce7; color: #166534;",
+                                "Failed" => "background-color: #fecaca; color: #991b1b;",
+                                _ => "background-color: #fef3c7; color: #92400e;"
+                            };
+                        }
+                        <div style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; @statusStyle">
+                            @screen.AnalysisStatus
+                        </div>
+                    </div>
+
+                    <div style="padding: 1.5rem;">
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #1f2937; margin: 0 0 0.5rem 0;">@screen.Name</h3>
+                        <p style="color: #6b7280; font-size: 0.875rem; margin: 0 0 0.75rem 0;">@screen.Description</p>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                <span style="color: #6b7280;">Project:</span>
+                                <span style="font-weight: 500;">@(screen.Project?.Name ?? "N/A")</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                <span style="color: #6b7280;">Loại màn hình:</span>
+                                <span style="font-weight: 500;">@(screen.ScreenType ?? "Chưa xác định")</span>
+                            </div>
+                            @if (screen.AnalysisConfidence.HasValue)
+                            {
+                                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                    <span style="color: #6b7280;">Độ tin cậy:</span>
+                                    <span style="font-weight: 500;">@(screen.AnalysisConfidence.Value.ToString("P1"))</span>
+                                </div>
+                            }
+                            @if (screen.ComplexityScore.HasValue)
+                            {
+                                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                    <span style="color: #6b7280;">Độ phức tạp:</span>
+                                    <div style="display: flex; align-items: center;">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fas fa-star" style="font-size: 0.75rem; color: @(i <= screen.ComplexityScore ? "#fbbf24" : "#d1d5db");"></i>
+                                        }
+                                        <span style="margin-left: 0.25rem; font-size: 0.75rem;">(@screen.ComplexityScore/5)</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem;">
+                            @if (screen.AnalysisStatus == "Pending" && Model.IsAIServiceAvailable)
+                            {
+                                <button onclick="analyzeScreen(@screen.Id, '@screen.Name')" 
+                                        style="flex: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; background-color: #2563eb; color: white; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer; font-size: 0.875rem;">
+                                    <i class="fas fa-brain" style="margin-right: 0.25rem;"></i>Phân tích
+                                </button>
+                            }
+                            @if (screen.AnalysisStatus == "Completed")
+                            {
+                                <button onclick="showAnalysisResult(@screen.Id)" 
+                                        style="flex: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; background-color: #16a34a; color: white; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer; font-size: 0.875rem;">
+                                    <i class="fas fa-eye" style="margin-right: 0.25rem;"></i>Xem kết quả
+                                </button>
+                            }
+                            @if (screen.AnalysisStatus == "Failed")
+                            {
+                                <button onclick="analyzeScreen(@screen.Id, '@screen.Name')" 
+                                        style="flex: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; background-color: #ea580c; color: white; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer; font-size: 0.875rem;">
+                                    <i class="fas fa-redo" style="margin-right: 0.25rem;"></i>Thử lại
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;">
+                <div style="color: #6b7280; font-size: 1.125rem; margin-bottom: 1rem;">
+                    <i class="fas fa-images" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                    <p>Không tìm thấy màn hình nào</p>
+                </div>
+                <a href="/UC01" style="display: inline-flex; align-items: center; padding: 0.75rem 1.5rem; background-color: #2563eb; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 500;">
+                    <i class="fas fa-upload" style="margin-right: 0.5rem;"></i>Upload màn hình đầu tiên
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- Batch Analysis Section -->
+    @if (Model.Projects.Any())
+    {
+        <div style="margin-top: 2rem; background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); padding: 1.5rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; color: #1f2937; margin: 0 0 1rem 0;">Phân tích hàng loạt</h3>
+            <form method="post" asp-page-handler="BatchAnalyze" style="display: flex; align-items: end; gap: 1rem;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Chọn Project</label>
+                    <select name="projectId" required style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                        <option value="">Chọn project...</option>
+                        @foreach (var project in Model.Projects)
+                        {
+                            <option value="@project.Id">@project.Name</option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" disabled="@(!Model.IsAIServiceAvailable)" 
+                        style="display: inline-flex; align-items: center; padding: 0.5rem 1rem; background-color: #7c3aed; color: white; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer; font-size: 0.875rem;">
+                    <i class="fas fa-play" style="margin-right: 0.5rem;"></i>Bắt đầu phân tích
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+<!-- Image Modal -->
+<div id="imageModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none; z-index: 50; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: white; border-radius: 0.5rem; max-width: 64rem; max-height: 100%; overflow: auto;">
+        <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="imageModalTitle" style="font-size: 1.125rem; font-weight: 600; margin: 0;"></h3>
+                <button onclick="closeImageModal()" style="color: #6b7280; background: none; border: none; cursor: pointer; font-size: 1.25rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div style="padding: 1rem;">
+            <img id="imageModalImg" src="" alt="" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Modal -->
+<div id="analysisModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none; z-index: 50; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: white; border-radius: 0.5rem; max-width: 64rem; max-height: 100%; overflow: auto;">
+        <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Phân tích màn hình</h3>
+                <button onclick="closeAnalysisModal()" style="color: #6b7280; background: none; border: none; cursor: pointer; font-size: 1.25rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div style="padding: 1.5rem;">
+            <form method="post" asp-page-handler="AnalyzeScreen">
+                <input type="hidden" asp-for="SelectedScreenId" id="analyzeScreenId">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Mô tả nghiệp vụ (tùy chọn)</label>
+                    <textarea asp-for="BusinessDescription" rows="3" 
+                              placeholder="Nhập mô tả về nghiệp vụ của màn hình này để AI phân tích chính xác hơn..."
+                              style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; resize: vertical;"></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button type="button" onclick="closeAnalysisModal()" 
+                            style="padding: 0.5rem 1rem; color: #6b7280; border: 1px solid #d1d5db; background: white; border-radius: 0.375rem; cursor: pointer;">
+                        Hủy
+                    </button>
+                    <button type="submit" style="padding: 0.5rem 1rem; background-color: #2563eb; color: white; border: none; border-radius: 0.375rem; cursor: pointer; display: inline-flex; align-items: center;">
+                        <i class="fas fa-brain" style="margin-right: 0.5rem;"></i>Bắt đầu phân tích
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Result Modal -->
+<div id="resultModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none; z-index: 50; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: white; border-radius: 0.5rem; max-width: 96rem; max-height: 100%; overflow: auto;">
+        <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Kết quả phân tích</h3>
+                <button onclick="closeResultModal()" style="color: #6b7280; background: none; border: none; cursor: pointer; font-size: 1.25rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="resultContent" style="padding: 1.5rem;">
+            <!-- Content will be loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="errorModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none; z-index: 50; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: white; border-radius: 0.5rem; max-width: 28rem; width: 100%;">
+        <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 1.125rem; font-weight: 600; color: #dc2626; margin: 0;">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>Thông báo
+                </h3>
+                <button onclick="closeErrorModal()" style="color: #6b7280; background: none; border: none; cursor: pointer; font-size: 1.25rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div style="padding: 1.5rem;">
+            <div id="errorMessage" style="color: #374151; margin-bottom: 1rem;">
+                <!-- Error message content -->
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+                <button onclick="closeErrorModal()" style="background-color: #2563eb; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer;">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// Handle image loading errors
+function handleImageError(img) {
+    img.style.display = 'none';
+    img.classList.add('error');
+    const fallback = img.nextElementSibling;
+    if (fallback && fallback.classList.contains('fallback')) {
+        fallback.style.display = 'flex';
+    }
+}
+
+function showImageModal(imagePath, title) {
+    // Check if image exists and can be loaded
+    const testImg = new Image();
+    testImg.onload = function() {
+        document.getElementById('imageModalImg').src = imagePath;
+        document.getElementById('imageModalTitle').textContent = title;
+        document.getElementById('imageModal').style.display = 'flex';
+    };
+    testImg.onerror = function() {
+        // If image fails to load, show default modal instead
+        showDefaultImageModal(title);
+    };
+    testImg.src = imagePath;
+}
+
+function showDefaultImageModal(title) {
+    // Create a default image for the modal
+    const defaultImageHtml = `
+        <div class="default-image-placeholder" style="width: 600px; height: 400px; border-radius: 0.5rem;">
+            <i class="fas fa-image" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.8;"></i>
+            <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">No Image Preview</h3>
+            <p style="font-size: 1rem; opacity: 0.9; text-align: center; margin: 0;">Screen image not available<br>Upload an image to see preview</p>
+        </div>
+    `;
+    
+    document.getElementById('imageModalTitle').textContent = title + ' - Default Preview';
+    const imgContainer = document.getElementById('imageModalImg').parentElement;
+    imgContainer.innerHTML = defaultImageHtml;
+    document.getElementById('imageModal').style.display = 'flex';
+}
+
+function closeImageModal() {
+    // Reset the image modal content back to normal img tag
+    const imgContainer = document.querySelector('#imageModal [style*="padding: 1rem"]');
+    if (imgContainer) {
+        imgContainer.innerHTML = '<img id="imageModalImg" src="" alt="" style="max-width: 100%; height: auto;">';
+    }
+    document.getElementById('imageModal').style.display = 'none';
+}
+
+function analyzeScreen(screenId, screenName) {
+    document.getElementById('analyzeScreenId').value = screenId;
+    document.getElementById('analysisModal').style.display = 'flex';
+}
+
+function closeAnalysisModal() {
+    document.getElementById('analysisModal').style.display = 'none';
+}
+
+function closeResultModal() {
+    document.getElementById('resultModal').style.display = 'none';
+}
+
+function showErrorModal(message) {
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorModal').style.display = 'flex';
+}
+
+function closeErrorModal() {
+    document.getElementById('errorModal').style.display = 'none';
+}
+
+async function showAnalysisResult(screenId) {
+    try {
+        const response = await fetch(`?handler=AnalysisResult&screenId=${screenId}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            showErrorModal(data.error);
+            return;
+        }
+        
+        const content = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+                <div>
+                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Thông tin cơ bản</h4>
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                            <span style="color: #6b7280;">Tên màn hình:</span>
+                            <span style="font-weight: 500;">${data.screenName}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                            <span style="color: #6b7280;">Loại màn hình:</span>
+                            <span style="font-weight: 500;">${data.screenType}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                            <span style="color: #6b7280;">Độ tin cậy:</span>
+                            <span style="font-weight: 500;">${(data.confidence * 100).toFixed(1)}%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                            <span style="color: #6b7280;">Thời gian phân tích:</span>
+                            <span style="font-weight: 500;">${data.processingTime}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">UI Elements (${data.elements.length})</h4>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${data.elements.map(element => `
+                            <div style="background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; margin-bottom: 0.5rem; border-left: 3px solid #2563eb;">
+                                <div style="font-weight: 500; margin-bottom: 0.25rem;">${element.elementName}</div>
+                                <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">Type: ${element.elementType}</div>
+                                ${element.elementLabel ? `<div style="font-size: 0.875rem; color: #6b7280;">Label: ${element.elementLabel}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Business Functions (${data.functions.length})</h4>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${data.functions.map(func => `
+                            <div style="background: #f0fdf4; padding: 0.75rem; border-radius: 0.375rem; margin-bottom: 0.5rem; border-left: 3px solid #16a34a;">
+                                <div style="font-weight: 500; margin-bottom: 0.25rem;">${func.functionName}</div>
+                                <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">Type: ${func.functionType}</div>
+                                ${func.description ? `<div style="font-size: 0.875rem; color: #6b7280;">${func.description}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('resultContent').innerHTML = content;
+        document.getElementById('resultModal').style.display = 'flex';
+        
+    } catch (error) {
+        showErrorModal('Có lỗi xảy ra khi tải kết quả phân tích');
+    }
+}
+</script>
+}

@@ -1,0 +1,108 @@
+---
+description: 
+globs: *.cshtml
+alwaysApply: false
+---
+# Tailwind CSS Component Design cho Razor Pages
+
+## Critical Rules
+
+- **Partial View Components**: Tạo reusable components trong `Pages/Shared/Components/`
+- **Responsive Design**: Luôn sử dụng Tailwind responsive prefixes (sm:, md:, lg:, xl:, 2xl:)
+- **Accessibility**: Thêm ARIA labels, proper semantic HTML, focus states
+- **Color Consistency**: Sử dụng Tailwind color palette, tránh custom colors
+- **Spacing System**: Sử dụng Tailwind spacing scale (p-4, m-6, gap-4, etc.)
+- **Component Props**: Partial Views nhận parameters để tái sử dụng
+- **Dark Mode**: Chuẩn bị dark: classes cho future dark mode support
+- **Performance**: Purge unused CSS với proper content configuration
+- **Naming Convention**: Component names bắt đầu với underscore (_Header.cshtml)
+- **Grid Systems**: Ưu tiên CSS Grid và Flexbox của Tailwind
+
+## Examples
+
+<example>
+  // ✅ Correct Partial View Component
+  @* Pages/Shared/Components/_Card.cshtml *@
+  @model CardViewModel
+  
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">@Model.Title</h3>
+          @if (!string.IsNullOrEmpty(Model.Badge))
+          {
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  @Model.Badge
+              </span>
+          }
+      </div>
+      <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">@Model.Description</p>
+      <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-500 dark:text-gray-400">@Model.Date.ToString("dd/MM/yyyy")</span>
+          <a href="@Model.Link" 
+             class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 rounded-lg transition-colors duration-200 focus:outline-none"
+             aria-label="Xem chi tiết @Model.Title">
+              Xem chi tiết
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+          </a>
+      </div>
+  </div>
+
+  // ✅ Correct Grid Layout
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4">
+      @foreach (var item in Model.Items)
+      {
+          <partial name="Components/_Card" model="item" />
+      }
+  </div>
+  
+  // ✅ Correct Form Component
+  <form class="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+              <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  @Localizer["Name"] <span class="text-red-500">*</span>
+              </label>
+              <input type="text" id="name" name="name" required
+                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200"
+                     placeholder="@Localizer["EnterName"]">
+          </div>
+      </div>
+  </form>
+</example>
+
+<example type="invalid">
+  // ❌ Sai: Inline styles thay vì Tailwind
+  <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
+      <h3 style="color: #333; font-size: 18px;">Title</h3>
+  </div>
+  
+  // ❌ Sai: Không responsive
+  <div class="w-300 h-200 p-10">
+      <!-- Fixed width không responsive -->
+  </div>
+  
+  // ❌ Sai: Không accessibility
+  <button class="bg-blue-500 text-white p-2">
+      Click me
+      <!-- Thiếu aria-label, focus states -->
+  </button>
+  
+  // ❌ Sai: Hardcoded colors
+  <div class="bg-[#ff0000] text-[#ffffff]">
+      <!-- Nên dùng bg-red-500 text-white -->
+  </div>
+  
+  // ❌ Sai: Component không reusable
+  <div class="card">
+      <h3>Hardcoded Title</h3>
+      <p>Hardcoded content</p>
+      <!-- Nên nhận parameters từ model -->
+  </div>
+  
+  // ❌ Sai: Spacing không consistent
+  <div class="p-3 m-5 gap-7">
+      <!-- Nên dùng scale chuẩn: p-4, m-6, gap-6 -->
+  </div>
+</example>

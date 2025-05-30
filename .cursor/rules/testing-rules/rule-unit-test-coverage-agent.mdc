@@ -1,0 +1,345 @@
+---
+description: 
+globs: *Tests.cs
+alwaysApply: false
+---
+# Unit Test với 100% Code Coverage (C1) cho ASP.NET Core
+
+## Critical Rules
+
+- **Test Project Structure**: Tạo test project với naming convention `ProjectName.Tests`
+- **Coverage Target**: Đạt 100% statement coverage (C1) cho tất cả business logic
+- **Test Frameworks**: Sử dụng xUnit + Moq + FluentAssertions + coverlet
+- **Test Naming**: Test methods theo pattern `MethodName_Scenario_ExpectedResult`
+- **AAA Pattern**: Arrange-Act-Assert trong mỗi test method
+- **Mock Dependencies**: Mock tất cả external dependencies và services
+- **Coverage Exclusions**: Exclude auto-generated code, Program.cs, migrations
+- **Edge Cases**: Test tất cả edge cases, null values, exceptions
+- **Integration vs Unit**: Tách biệt unit tests và integration tests
+- **CI/CD Integration**: Coverage reports trong build pipeline
+
+## Examples
+
+<example>
+  // ✅ Correct Test Project Structure
+  QAgentWeb.Tests/
+    Services/
+      OpenAIServiceTests.cs
+      GoogleDriveServiceTests.cs
+      ExcelExportServiceTests.cs
+    Pages/
+      UC01/
+        IndexModelTests.cs
+      UC02/
+        IndexModelTests.cs
+    Helpers/
+      TestHelpers.cs
+      MockFactory.cs
+    QAgentWeb.Tests.csproj
+
+  // ✅ Correct Test Project Configuration (.csproj)
+  <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+      <TargetFramework>net8.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+      <IsPackable>false</IsPackable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+      <PackageReference Include="xunit" Version="2.6.1" />
+      <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+      <PackageReference Include="Moq" Version="4.20.69" />
+      <PackageReference Include="FluentAssertions" Version="6.12.0" />
+      <PackageReference Include="coverlet.collector" Version="6.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\QAgentWeb\QAgentWeb.csproj" />
+    </ItemGroup>
+  </Project>
+
+  // ✅ Correct Service Unit Test với 100% Coverage
+  public class OpenAIServiceTests
+  {
+      private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
+      private readonly Mock<IOptions<OpenAISettings>> _optionsMock;
+      private readonly Mock<ILogger<OpenAIService>> _loggerMock;
+      private readonly Mock<HttpMessageHandler> _httpMessageHandlerMock;
+      private readonly OpenAIService _sut; // System Under Test
+      
+      public OpenAIServiceTests()
+      {
+          _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+          _optionsMock = new Mock<IOptions<OpenAISettings>>();
+          _loggerMock = new Mock<ILogger<OpenAIService>>();
+          _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
+          
+          var settings = new OpenAISettings { ApiKey = "test-key", BaseUrl = "https://api.openai.com" };
+          _optionsMock.Setup(x => x.Value).Returns(settings);
+          
+          var httpClient = new HttpClient(_httpMessageHandlerMock.Object)
+          {
+              BaseAddress = new Uri("https://api.openai.com")
+          };
+          _httpClientFactoryMock.Setup(x => x.CreateClient("OpenAI")).Returns(httpClient);
+          
+          _sut = new OpenAIService(_httpClientFactoryMock.Object, _optionsMock.Object, _loggerMock.Object);
+      }
+      
+      [Fact]
+      public async Task GenerateTextAsync_ValidPrompt_ReturnsSuccess()
+      {
+          // Arrange
+          var prompt = "Test prompt";
+          var expectedResponse = new OpenAIResponse { Text = "Generated text", Success = true };
+          var responseJson = JsonSerializer.Serialize(expectedResponse);
+          
+          _httpMessageHandlerMock.SetupRequest(HttpMethod.Post, "/v1/completions")
+              .ReturnsResponse(HttpStatusCode.OK, responseJson);
+          
+          // Act
+          var result = await _sut.GenerateTextAsync(prompt);
+          
+          // Assert
+          result.Should().NotBeNull();
+          result.Text.Should().Be("Generated text");
+          result.Success.Should().BeTrue();
+      }
+      
+      [Fact]
+      public async Task GenerateTextAsync_EmptyPrompt_ThrowsArgumentException()
+      {
+          // Arrange
+          var emptyPrompt = "";
+          
+          // Act & Assert
+          var action = async () => await _sut.GenerateTextAsync(emptyPrompt);
+          await action.Should().ThrowAsync<ArgumentException>()
+              .WithMessage("Prompt cannot be empty*");
+      }
+      
+      [Fact]
+      public async Task GenerateTextAsync_HttpRequestException_ThrowsOpenAIException()
+      {
+          // Arrange
+          var prompt = "Test prompt";
+          _httpMessageHandlerMock.SetupRequest(HttpMethod.Post, "/v1/completions")
+              .ThrowsAsync(new HttpRequestException("Network error"));
+          
+          // Act & Assert
+          var action = async () => await _sut.GenerateTextAsync(prompt);
+          await action.Should().ThrowAsync<OpenAIException>()
+              .WithMessage("Failed to generate text");
+          
+          // Verify logging
+          _loggerMock.VerifyLog(LogLevel.Error, "Error calling OpenAI API for prompt: Test prompt");
+      }
+      
+      [Fact]
+      public async Task GenerateTextAsync_InvalidApiResponse_ThrowsJsonException()
+      {
+          // Arrange
+          var prompt = "Test prompt";
+          _httpMessageHandlerMock.SetupRequest(HttpMethod.Post, "/v1/completions")
+              .ReturnsResponse(HttpStatusCode.OK, "Invalid JSON");
+          
+          // Act & Assert
+          var action = async () => await _sut.GenerateTextAsync(prompt);
+          await action.Should().ThrowAsync<JsonException>();
+      }
+      
+      [Theory]
+      [InlineData(null)]
+      [InlineData("")]
+      [InlineData("   ")]
+      public async Task GenerateTextAsync_InvalidPrompt_ThrowsArgumentException(string invalidPrompt)
+      {
+          // Act & Assert
+          var action = async () => await _sut.GenerateTextAsync(invalidPrompt);
+          await action.Should().ThrowAsync<ArgumentException>();
+      }
+  }
+
+  // ✅ Correct Page Model Unit Test
+  public class UC01IndexModelTests
+  {
+      private readonly Mock<IStringLocalizer<UC01.IndexModel>> _localizerMock;
+      private readonly Mock<IOpenAIService> _openAIServiceMock;
+      private readonly Mock<ILogger<UC01.IndexModel>> _loggerMock;
+      private readonly UC01.IndexModel _sut;
+      
+      public UC01IndexModelTests()
+      {
+          _localizerMock = new Mock<IStringLocalizer<UC01.IndexModel>>();
+          _openAIServiceMock = new Mock<IOpenAIService>();
+          _loggerMock = new Mock<ILogger<UC01.IndexModel>>();
+          
+          _sut = new UC01.IndexModel(_localizerMock.Object, _openAIServiceMock.Object, _loggerMock.Object);
+      }
+      
+      [Fact]
+      public void OnGet_SetsViewDataCorrectly()
+      {
+          // Arrange
+          _localizerMock.Setup(x => x["PageTitle"]).Returns(new LocalizedString("PageTitle", "Test Title"));
+          _localizerMock.Setup(x => x["PageDescription"]).Returns(new LocalizedString("PageDescription", "Test Description"));
+          
+          // Act
+          _sut.OnGet();
+          
+          // Assert
+          _sut.ViewData["Title"].Should().Be("Test Title");
+          _sut.ViewData["Description"].Should().Be("Test Description");
+      }
+      
+      [Fact]
+      public async Task OnPostGenerateAsync_ValidInput_ReturnsPageResult()
+      {
+          // Arrange
+          _sut.UserInput = "Test input";
+          var expectedResponse = new OpenAIResponse { Text = "Generated response", Success = true };
+          _openAIServiceMock.Setup(x => x.GenerateTextAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+              .ReturnsAsync(expectedResponse);
+          
+          // Act
+          var result = await _sut.OnPostGenerateAsync();
+          
+          // Assert
+          result.Should().BeOfType<PageResult>();
+          _sut.GeneratedText.Should().Be("Generated response");
+          _sut.HasError.Should().BeFalse();
+      }
+  }
+
+  // ✅ Correct Coverage Configuration (coverlet.runsettings)
+  <?xml version="1.0" encoding="utf-8" ?>
+  <RunSettings>
+    <DataCollectionRunSettings>
+      <DataCollectors>
+        <DataCollector friendlyName="XPlat code coverage">
+          <Configuration>
+            <Format>opencover,cobertura,json,lcov,teamcity,sonarqube</Format>
+            <Exclude>[*.Tests]*,[*]*.Program,[*]*.Startup</Exclude>
+            <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
+            <ExcludeByFile>**/Migrations/**/*.cs</ExcludeByFile>
+            <IncludeTestAssembly>false</IncludeTestAssembly>
+            <SingleHit>false</SingleHit>
+            <UseSourceLink>true</UseSourceLink>
+            <IncludeDirectory>../QAgentWeb/</IncludeDirectory>
+          </Configuration>
+        </DataCollector>
+      </DataCollectors>
+    </DataCollectionRunSettings>
+  </RunSettings>
+
+  // ✅ Correct Test Commands
+  // Run tests with coverage
+  dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
+  
+  // Generate coverage report
+  dotnet tool install -g dotnet-reportgenerator-globaltool
+  reportgenerator -reports:"TestResults/**/coverage.opencover.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:Html
+  
+  // Coverage threshold check
+  dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Threshold=100
+
+  // ✅ Correct Mock Extensions Helper
+  public static class MockExtensions
+  {
+      public static Mock<HttpMessageHandler> SetupRequest(this Mock<HttpMessageHandler> mock, HttpMethod method, string requestUri)
+      {
+          return mock.Setup<Task<HttpResponseMessage>>(
+              "SendAsync",
+              ItExpr.Is<HttpRequestMessage>(req => req.Method == method && req.RequestUri.ToString().Contains(requestUri)),
+              ItExpr.IsAny<CancellationToken>());
+      }
+      
+      public static void VerifyLog<T>(this Mock<ILogger<T>> mock, LogLevel level, string message)
+      {
+          mock.Verify(
+              x => x.Log(
+                  level,
+                  It.IsAny<EventId>(),
+                  It.Is<It.IsAnyType>((v, t) => v.ToString().Contains(message)),
+                  It.IsAny<Exception>(),
+                  It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+              Times.Once);
+      }
+  }
+</example>
+
+<example type="invalid">
+  // ❌ Sai: Test thiếu coverage cho edge cases
+  [Fact]
+  public void GenerateText_ValidInput_ReturnsResult()
+  {
+      // Chỉ test happy path, thiếu null check, exception handling
+      var result = _service.GenerateText("test");
+      Assert.NotNull(result);
+  }
+  
+  // ❌ Sai: Không mock dependencies
+  [Fact]
+  public void TestWithRealDependencies()
+  {
+      var service = new OpenAIService(new HttpClient(), options, logger);
+      // Gọi real API, không isolated
+  }
+  
+  // ❌ Sai: Test naming không descriptive
+  [Fact]
+  public void Test1() // Không rõ test gì
+  {
+      // Test content
+  }
+  
+  // ❌ Sai: Không verify all paths
+  public string ProcessData(string input)
+  {
+      if (string.IsNullOrEmpty(input)) // Branch 1
+          return "empty";
+      
+      if (input.Length > 100) // Branch 2
+          return "too long";
+          
+      return input.ToUpper(); // Branch 3
+  }
+  
+  // Test chỉ cover branch 3, thiếu branch 1 và 2
+  [Fact]
+  public void ProcessData_ValidInput_ReturnsUpper()
+  {
+      var result = _service.ProcessData("test");
+      Assert.Equal("TEST", result);
+  }
+  
+  // ❌ Sai: Không test exception scenarios
+  [Fact]
+  public void CallExternalAPI_OnlyTestSuccess()
+  {
+      // Không test network failures, timeouts, invalid responses
+  }
+  
+  // ❌ Sai: Coverage threshold không được set
+  // Thiếu configuration để enforce 100% coverage
+  
+  // ❌ Sai: Test dependencies on external resources
+  [Fact]
+  public void TestWithDatabase()
+  {
+      // Connect to real database thay vì mock
+      var data = _dbContext.Users.ToList();
+  }
+  
+  // ❌ Sai: Async test không await
+  [Fact]
+  public void AsyncTest()
+  {
+      var task = _service.GetDataAsync();
+      // Không await, có thể false positive
+  }
+</example>
+

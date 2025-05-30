@@ -1,0 +1,77 @@
+@page
+@model QAgentWeb.Pages.Admin.SqlExecutorModel
+@{
+    ViewData["Title"] = "SQL Executor";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">SQL Executor</h1>
+        
+        @if (!string.IsNullOrEmpty(Model.Message))
+        {
+            <div class="mb-6 p-4 rounded-lg @(Model.IsSuccess ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
+                <div class="flex items-center">
+                    @if (Model.IsSuccess)
+                    {
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    }
+                    <span class="font-medium">@Model.Message</span>
+                </div>
+            </div>
+        }
+
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <form method="post" asp-page-handler="CreateTables">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                        Create Tables
+                    </button>
+                </form>
+                <form method="post" asp-page-handler="SeedData">
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                        Seed Data
+                    </button>
+                </form>
+                <form method="post" asp-page-handler="DropTables">
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200" 
+                            onclick="return confirm('Are you sure you want to drop all tables?')">
+                        Drop Tables
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Custom SQL</h3>
+            <form method="post" asp-page-handler="ExecuteSql">
+                <div class="mb-4">
+                    <label for="sqlQuery" class="block text-sm font-medium text-gray-700 mb-2">SQL Query</label>
+                    <textarea id="sqlQuery" name="sqlQuery" rows="10" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                              placeholder="Enter your SQL query here...">@Model.SqlQuery</textarea>
+                </div>
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200">
+                    Execute SQL
+                </button>
+            </form>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.QueryResult))
+        {
+            <div class="bg-white shadow-lg rounded-lg p-6 mt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Query Result</h3>
+                <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">@Model.QueryResult</pre>
+            </div>
+        }
+    </div>
+</div> 

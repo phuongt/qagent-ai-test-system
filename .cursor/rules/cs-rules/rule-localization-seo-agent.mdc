@@ -1,0 +1,243 @@
+---
+description: 
+globs: *.cshtml
+alwaysApply: false
+---
+# Localization & SEO Optimization cho ASP.NET Core
+
+## Critical Rules
+
+- **Resource Files**: Tạo .resx files trong folder `Resources/` theo naming convention
+- **Culture Middleware**: Cấu hình RequestLocalizationOptions trong Program.cs
+- **SEO Metadata**: Mỗi page phải có Title, Description, Keywords, OG tags
+- **Structured Data**: Implement JSON-LD schema markup
+- **Sitemap Generation**: Tự động generate sitemap.xml với multilingual URLs
+- **Canonical URLs**: Thêm canonical tags cho mỗi page
+- **Hreflang Tags**: Implement hreflang cho multilingual SEO
+- **Culture Selection**: Cookie-based culture persistence
+- **Resource Injection**: Sử dụng IStringLocalizer trong Page Models
+- **URL Structure**: SEO-friendly URLs với culture code
+
+## Examples
+
+<example>
+  // ✅ Correct Resource File Structure
+  Resources/
+    Pages.Shared._Layout.vi.resx
+    Pages.Shared._Layout.en.resx
+    Pages.UC01.Index.vi.resx
+    Pages.UC01.Index.en.resx
+    
+  // ✅ Correct Program.cs Configuration
+  builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+  builder.Services.AddRazorPages()
+      .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+      .AddDataAnnotationsLocalization();
+      
+  builder.Services.Configure<RequestLocalizationOptions>(options =>
+  {
+      var supportedCultures = new[] { "en", "vi" };
+      options.SetDefaultCulture("vi")
+             .AddSupportedCultures(supportedCultures)
+             .AddSupportedUICultures(supportedCultures);
+             
+      options.RequestCultureProviders.Insert(0, new QueryStringRequestCultureProvider());
+      options.RequestCultureProviders.Insert(1, new CookieRequestCultureProvider());
+  });
+  
+  var app = builder.Build();
+  app.UseRequestLocalization();
+  
+  // ✅ Correct Page Model with Localization & SEO
+  public class IndexModel : PageModel
+  {
+      private readonly IStringLocalizer<IndexModel> _localizer;
+      private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
+      
+      public IndexModel(
+          IStringLocalizer<IndexModel> localizer,
+          IStringLocalizer<SharedResource> sharedLocalizer)
+      {
+          _localizer = localizer;
+          _sharedLocalizer = sharedLocalizer;
+      }
+      
+      public void OnGet()
+      {
+          // SEO Metadata
+          ViewData["Title"] = _localizer["PageTitle"];
+          ViewData["Description"] = _localizer["PageDescription"];
+          ViewData["Keywords"] = _localizer["PageKeywords"];
+          ViewData["OgTitle"] = _localizer["OgTitle"];
+          ViewData["OgDescription"] = _localizer["OgDescription"];
+          ViewData["OgImage"] = Url.Content("~/images/og-image.jpg");
+          ViewData["CanonicalUrl"] = Url.Page("/UC01/Index", new { culture = CultureInfo.CurrentCulture.Name });
+          
+          // Structured Data
+          ViewData["JsonLd"] = GenerateJsonLd();
+      }
+      
+      private string GenerateJsonLd()
+      {
+          return JsonSerializer.Serialize(new
+          {
+              context = "https://schema.org",
+              type = "WebPage",
+              name = _localizer["PageTitle"].Value,
+              description = _localizer["PageDescription"].Value,
+              url = ViewData["CanonicalUrl"]
+          });
+      }
+  }
+  
+  // ✅ Correct _Layout.cshtml với SEO và Hreflang
+  <!DOCTYPE html>
+  <html lang="@CultureInfo.CurrentCulture.TwoLetterISOLanguageName">
+  <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      
+      <!-- SEO Meta Tags -->
+      <title>@ViewData["Title"] - @_sharedLocalizer["SiteName"]</title>
+      <meta name="description" content="@ViewData["Description"]" />
+      <meta name="keywords" content="@ViewData["Keywords"]" />
+      <link rel="canonical" href="@ViewData["CanonicalUrl"]" />
+      
+      <!-- Open Graph -->
+      <meta property="og:title" content="@ViewData["OgTitle"]" />
+      <meta property="og:description" content="@ViewData["OgDescription"]" />
+      <meta property="og:image" content="@ViewData["OgImage"]" />
+      <meta property="og:url" content="@ViewData["CanonicalUrl"]" />
+      <meta property="og:type" content="website" />
+      <meta property="og:locale" content="@CultureInfo.CurrentCulture.Name.Replace("-", "_")" />
+      
+      <!-- Hreflang Tags -->
+      <link rel="alternate" hreflang="vi" href="@Url.Page(ViewContext.RouteData.Values["page"].ToString(), new { culture = "vi" })" />
+      <link rel="alternate" hreflang="en" href="@Url.Page(ViewContext.RouteData.Values["page"].ToString(), new { culture = "en" })" />
+      <link rel="alternate" hreflang="x-default" href="@Url.Page(ViewContext.RouteData.Values["page"].ToString(), new { culture = "vi" })" />
+      
+      <!-- Structured Data -->
+      @if (ViewData["JsonLd"] != null)
+      {
+          <script type="application/ld+json">
+              @Html.Raw(ViewData["JsonLd"])
+          </script>
+      }
+  </head>
+  
+  // ✅ Correct Sitemap.cshtml.cs
+  public class SitemapModel : PageModel
+  {
+      public async Task<IActionResult> OnGetAsync()
+      {
+          var sitemap = GenerateSitemap();
+          return Content(sitemap, "application/xml");
+      }
+      
+      private string GenerateSitemap()
+      {
+          var urls = new List<SitemapUrl>
+          {
+              new("/", new[] { "vi", "en" }),
+              new("/UC01", new[] { "vi", "en" }),
+              new("/UC02", new[] { "vi", "en" })
+              // Add more URLs
+          };
+          
+          var xml = new StringBuilder();
+          xml.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+          xml.AppendLine("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">");
+          
+          foreach (var url in urls)
+          {
+              foreach (var culture in url.Cultures)
+              {
+                  xml.AppendLine("<url>");
+                  xml.AppendLine($"<loc>{Request.Scheme}://{Request.Host}{url.Path}?culture={culture}</loc>");
+                  xml.AppendLine($"<lastmod>{DateTime.UtcNow:yyyy-MM-dd}</lastmod>");
+                  xml.AppendLine("<changefreq>weekly</changefreq>");
+                  xml.AppendLine("<priority>0.8</priority>");
+                  
+                  // Hreflang alternates
+                  foreach (var altCulture in url.Cultures)
+                  {
+                      xml.AppendLine($"<xhtml:link rel=\"alternate\" hreflang=\"{altCulture}\" href=\"{Request.Scheme}://{Request.Host}{url.Path}?culture={altCulture}\" />");
+                  }
+                  
+                  xml.AppendLine("</url>");
+              }
+          }
+          
+          xml.AppendLine("</urlset>");
+          return xml.ToString();
+      }
+  }
+  
+  // ✅ Correct Culture Selection Component
+  @* Pages/Shared/Components/_CultureSelector.cshtml *@
+  <div class="relative inline-block text-left">
+      <select id="culture-selector" 
+              class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onchange="changeCulture(this.value)">
+          <option value="vi" @(CultureInfo.CurrentCulture.Name == "vi" ? "selected" : "")>🇻🇳 Tiếng Việt</option>
+          <option value="en" @(CultureInfo.CurrentCulture.Name == "en" ? "selected" : "")>🇺🇸 English</option>
+      </select>
+  </div>
+  
+  <script>
+      function changeCulture(culture) {
+          const url = new URL(window.location);
+          url.searchParams.set('culture', culture);
+          
+          // Set cookie for persistence
+          document.cookie = `culture=${culture}; path=/; max-age=31536000`; // 1 year
+          
+          window.location.href = url.toString();
+      }
+  </script>
+</example>
+
+<example type="invalid">
+  // ❌ Sai: Hardcoded text thay vì localization
+  <h1>Welcome to our website</h1>
+  <p>This is a description in English</p>
+  // Nên dùng: @_localizer["WelcomeMessage"]
+  
+  // ❌ Sai: Thiếu SEO metadata
+  public void OnGet()
+  {
+      // Không set ViewData["Title"], ViewData["Description"]
+  }
+  
+  // ❌ Sai: Không có canonical URL
+  <head>
+      <title>Page Title</title>
+      <!-- Thiếu canonical, og tags, hreflang -->
+  </head>
+  
+  // ❌ Sai: Resource files không đúng naming convention
+  Resources/
+    UC01.resx  // Sai, nên là Pages.UC01.Index.vi.resx
+    Layout.resx  // Sai, nên là Pages.Shared._Layout.vi.resx
+  
+  // ❌ Sai: Không cấu hình culture middleware
+  var app = builder.Build();
+  // Thiếu app.UseRequestLocalization();
+  
+  // ❌ Sai: Direct string thay vì resource key
+  ViewData["Title"] = "Trang chủ"; // Hardcoded Vietnamese
+  ViewData["Description"] = "Home page"; // Hardcoded English
+  // Nên dùng: ViewData["Title"] = _localizer["HomePageTitle"];
+  
+  // ❌ Sai: Sitemap không multilingual
+  <url>
+      <loc>https://example.com/page</loc>
+      <!-- Thiếu culture variants và hreflang -->
+  </url>
+  
+  // ❌ Sai: Không persistent culture selection
+  function changeCulture(culture) {
+      window.location.href = `?culture=${culture}`;
+      // Thiếu cookie để lưu preference
+  }
+</example>

@@ -1,0 +1,312 @@
+﻿@page
+@model IndexModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<QAgentWeb.Resources.SharedResource> Localizer
+@{
+    ViewData["Title"] = "QAgent - AI-Powered Test Management System";
+    ViewData["Description"] = "QAgent là hệ thống quản lý kiểm thử thông minh với AI, hỗ trợ upload UI screenshots, phân tích nghiệp vụ và sinh test case tự động.";
+}
+
+<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); overflow: hidden; padding: 3.5rem; box-sizing: border-box;">
+    <style>
+        .workflow-step {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+        .workflow-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 16px;
+            top: 32px;
+            width: 2px;
+            height: calc(100% - 8px);
+            background: repeating-linear-gradient(
+                to bottom,
+                #9ca3af 0px,
+                #9ca3af 6px,
+                transparent 6px,
+                transparent 12px
+            );
+            z-index: 0;
+        }
+        .workflow-icon {
+            position: relative;
+            z-index: 1;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        @@media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+        }
+        
+        /* Hide cursor when Typed.js is active */
+        .typed-cursor {
+            display: none !important;
+        }
+        
+        #description.typed-js-active {
+            caret-color: transparent;
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <div style="text-align: center; margin-bottom: 3.5rem;">
+        <h1 style="font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+            Quality on the double<span style="margin-left: 0.5rem;">🤖</span> QAgent
+        </h1>
+        <p style="font-size: clamp(0.85rem, 1.8vw, 1rem); color: #374151; max-width: 100%; margin: 0 auto; padding: 0 1rem;">
+            Gen test case in seconds, with your personal AI testing engineer
+        </p>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="main-grid" style="display: grid; grid-template-columns: minmax(260px, 1.5fr) minmax(260px, 1fr); gap: 0.5rem; align-items: start; max-width: 950px; margin: 0 auto; width: 100%; height: 150%; overflow: hidden; ">
+        
+        <!-- Left Column - Upload Section -->
+        <div style="width: 100%; height: fit-content; overflow: hidden;padding-left:3rem;">
+            <!-- Upload Area -->
+            <div id="drop-zone" class="glass-effect" style="border: 2px dashed #3b82f6; border-radius: 0.5rem; padding:2rem; cursor: pointer; transition: all 0.3s; margin-bottom: 2rem; width: 100%; box-sizing: border-box;">
+                <!-- Upload Icon -->
+                <div style="text-align: center; margin-bottom: 0.6rem;">
+                    <div style="display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.4rem;">
+                        <svg style="width: 2.5rem; height: 2.5rem; color: #3b82f6;" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                            <path d="M12,11L16,15H13V19H11V15H8L12,11Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <h2 style="font-size: 1rem; font-weight: 600; color: #1f2937; margin-bottom: 0.2rem;">
+                        Upload screenshots
+                    </h2>
+                    <p style="font-size: 0.75rem; color: #6b7280;">
+                        Drag & drop or click to browse
+                    </p>
+                </div>
+            </div>
+
+            <!-- Description Section -->
+            <div class="glass-effect" style="border-radius: 0.5rem; padding: 0.9rem; margin-bottom: 1.5rem; width: 100%; box-sizing: border-box;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 500; color: #1f2937; margin-bottom: 0.6rem;">
+                    Description
+                </label>
+                <textarea 
+                    id="description" 
+                    rows="2" 
+                    style="width: 100%; padding: 2.2rem 0.8rem; border: 1px solid #d1d5db; border-radius: 0.4rem; background: white; font-size: 0.75rem; resize: none; outline: none; box-sizing: border-box;"
+                    placeholder="Describe the functionality you want to test..."
+                ></textarea>
+            </div>
+
+            <!-- Generate Button -->
+            <button style="width: 100%; background: #3b82f6; color: white; font-weight: 600; padding: 0.85rem 1rem; border-radius: 0.4rem; font-size: 0.85rem; border: none; cursor: pointer; box-shadow: 0 3px 4px -1px rgba(0, 0, 0, 0.1); transition: background-color 0.2s; box-sizing: border-box;">
+                Gen test case
+            </button>
+        </div>
+
+        <!-- Right Column - Workflow Steps -->
+        <div style="width: 100%; height: fit-content; overflow: hidden;padding-left:3rem;">
+            <!-- Step 1 -->
+            <div class="workflow-step" style="display: flex; align-items: flex-start; gap: 0.6rem;margin-bottom:1.35rem;">
+                <div class="workflow-icon" style="flex-shrink: 0; width: 2.2rem; height: 2.2rem; background: #374151; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg style="width: 1.75rem; height: 1.75rem;" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 style="font-weight: 600; color: #1f2937; font-size: 1rem; line-height: 1.2;">
+                        Upload screenshots & description
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="workflow-step" style="display: flex; align-items: flex-start; gap: 0.6rem;margin-bottom:1.35rem;">
+                <div class="workflow-icon" style="flex-shrink: 0; width: 2.2rem; height: 2.2rem; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 1.3rem;">🤖</span>
+                </div>
+                <div>
+                    <h3 style="font-weight: 600; color: #1f2937; font-size: 1rem; line-height: 1.2;">
+                        AI analyzes screens & events
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="workflow-step" style="display: flex; align-items: flex-start; gap: 0.6rem;margin-bottom:1.35rem;">
+                <div class="workflow-icon" style="flex-shrink: 0; width: 2.2rem; height: 2.2rem; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 1.3rem;">🤖</span>
+                </div>
+                <div>
+                    <h3 style="font-weight: 600; color: #1f2937; font-size: 1rem; line-height: 1.2;">
+                        AI synthesizes rules/viewpoints<br/>
+                        <span style="font-size: 0.8rem; font-weight: normal;">& creates checklist</span>
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="workflow-step" style="display: flex; align-items: flex-start; gap: 0.6rem;margin-bottom:1.35rem;">
+                <div class="workflow-icon" style="flex-shrink: 0; width: 2.2rem; height: 2.2rem; background: #10b981; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg style="width: 1.75rem; height: 1.75rem;" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 style="font-weight: 600; color: #1f2937; font-size: 1rem; line-height: 1.2;">
+                        Review checklist
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="workflow-step" style="display: flex; align-items: flex-start; gap: 0.6rem;margin-bottom:1.35rem;">
+                <div class="workflow-icon" style="flex-shrink: 0; width: 2.2rem; height: 2.2rem; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 1.3rem;">🤖</span>
+                </div>
+                <div>
+                    <h3 style="font-weight: 600; color: #1f2937; font-size: 1rem; line-height: 1.2;">
+                        AI generates test cases for<br/>
+                        <span style="font-size: 0.8rem; font-weight: normal;">approved views</span>
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div style="display: flex; align-items: flex-start; gap: 0.6rem;margin-bottom:1.35rem;">
+                <div class="workflow-icon" style="flex-shrink: 0; width: 2.2rem; height: 2.2rem; background: #374151; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg style="width: 1.75rem; height: 1.75rem;" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 style="font-weight: 600; color: #1f2937; font-size: 1rem; line-height: 1.2;">
+                        Modify or export test cases
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/typed/typed.min.js"></script>
+<script>
+    // Add drag and drop functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing...');
+        
+        const dropZone = document.getElementById('drop-zone');
+        const textarea = document.getElementById('description');
+        
+        console.log('Found textarea:', textarea);
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#1d4ed8';
+            dropZone.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+        });
+        
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#3b82f6';
+            dropZone.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#3b82f6';
+            dropZone.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+            
+            const files = Array.from(e.dataTransfer.files);
+            console.log('Files dropped:', files);
+            
+            // Visual feedback
+            dropZone.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="color: #10b981; font-size: 2rem; margin-bottom: 0.5rem;">✓</div>
+                    <p style="color: #10b981; font-weight: 500;">${files.length} file(s) uploaded</p>
+                </div>
+            `;
+        });
+        
+        dropZone.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = 'image/*';
+            input.click();
+            
+            input.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                console.log('Files selected:', files);
+                
+                if (files.length > 0) {
+                    dropZone.innerHTML = `
+                        <div style="text-center;">
+                            <div style="color: #10b981; font-size: 2rem; margin-bottom: 0.5rem;">✓</div>
+                            <p style="color: #10b981; font-weight: 500;">${files.length} file(s) selected</p>
+                        </div>
+                    `;
+                }
+            });
+        });
+        
+        // Initialize typing effect
+        setTimeout(() => {
+            console.log('Initializing Typed.js...');
+            console.log('Typed available:', typeof Typed);
+            
+            if (typeof Typed !== 'undefined' && textarea) {
+                const typed = new Typed("#description", {
+                    strings: [
+                        "Describe the login functionality you want to test...",
+                        "Test the user registration process...",
+                        "Verify the shopping cart checkout flow...",
+                        "Test the search functionality...",
+                        "Validate the form submission process...",
+                        "Check the navigation between pages...",
+                        "Test the data validation rules...",
+                        "Verify the error handling scenarios..."
+                    ],
+                    typeSpeed: 50,
+                    backSpeed: 25,
+                    smartBackspace: true,
+                    loop: true,
+                    attr: "placeholder",
+                    bindInputFocusEvents: true,
+                    onBegin: function(self) {
+                        textarea.classList.add('typed-js-active');
+                    },
+                    onComplete: function(self) {
+                        textarea.classList.remove('typed-js-active');
+                    }
+                });
+                
+                // Add class when typing starts
+                textarea.classList.add('typed-js-active');
+                
+                // Remove class when user focuses on textarea
+                textarea.addEventListener('focus', function() {
+                    typed.stop();
+                    textarea.classList.remove('typed-js-active');
+                });
+                
+                // Restart typing when user leaves textarea (if empty)
+                textarea.addEventListener('blur', function() {
+                    if (textarea.value === '') {
+                        typed.start();
+                        textarea.classList.add('typed-js-active');
+                    }
+                });
+                
+                console.log('Typed.js initialized successfully');
+            } else {
+                console.error('Typed.js not available or textarea not found');
+            }
+        }, 1000);
+    });
+</script>

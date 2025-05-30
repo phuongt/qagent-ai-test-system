@@ -1,0 +1,186 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: QAgent system architecture and development workflow rules. Apply when working on QAgent AI-powered checklist and test case generation system, including system design decisions, technology stack integration, and overall development approach.
+globs: 
+alwaysApply: false
+---
+
+# QAgent System Architecture Rules
+
+## Critical Rules
+
+- **System Purpose**: QAgent automatically generates checklists and test cases from UI images and business descriptions following ISTQB testing standards
+- **Technology Stack**: Laravel 10 backend, Blade + Tailwind CSS frontend, SQLite/MongoDB database, OpenAI/Google Vision APIs, Vector Database for similarity search
+- **Core Workflow**: Project Creation → Screen Upload → AI Analysis → Checklist Generation → User Review → Test Case Export
+- **AI Integration**: Use dedicated service classes for OpenAI, Google Vision, and Vector DB with proper error handling and rate limiting
+- **Data Flow**: UI Images → Vision Analysis → Element Extraction → ISTQB Rule Application → Checklist Generation → User Confirmation → Test Case Export
+- **Authentication**: Laravel Breeze for web auth, prepare for API tokens for external integrations
+- **File Management**: Store images in cloud storage (Google Drive integration), metadata in database
+- **Queue System**: Use Laravel queues for AI processing, image analysis, and heavy computations
+- **ISTQB Compliance**: Implement testing rules database with viewpoint classification by domain/function
+- **Vector Search**: Store embeddings for UI elements, business descriptions, and generated checklists for similarity matching
+- **Export Integration**: Google Sheets API for test case export and collaboration
+- **Performance**: Cache ISTQB rules, optimize database queries, implement proper pagination
+- **Error Handling**: Graceful degradation when AI services fail, user-friendly error messages
+- **Testing Strategy**: Comprehensive test suite with mocked AI services and ISTQB compliance validation
+- **Scalability**: Design for horizontal scaling with separated concerns and microservice-ready architecture
+
+## Examples
+
+<example>
+  // System architecture overview
+  QAgent System Components:
+  
+  1. Frontend Layer (Blade + Tailwind CSS)
+     - Project management interface
+     - Screen upload with drag-and-drop
+     - Checklist review and editing
+     - Dashboard with statistics
+  
+  2. Backend Layer (Laravel 10)
+     - RESTful API controllers
+     - Service layer for AI integration
+     - Queue jobs for async processing
+     - Authentication and authorization
+  
+  3. AI Integration Layer
+     - OpenAIService for checklist generation
+     - GoogleVisionService for image analysis
+     - VectorDBService for similarity search
+     - ISTQBRuleEngine for compliance
+  
+  4. Data Layer
+     - Primary database (SQLite/MongoDB)
+     - Vector database for embeddings
+     - File storage (local/cloud)
+     - Cache layer (Redis/File)
+  
+  5. External Integrations
+     - Google Drive API for file storage
+     - Google Sheets API for export
+     - OpenAI API for text generation
+     - Google Vision API for image analysis
+  
+  // Core workflow implementation
+  class QAgentWorkflow
+  {
+      public function processScreenToChecklist(Screen $screen, string $businessDescription): Checklist
+      {
+          // 1. Analyze UI image
+          $uiElements = $this->visionService->analyzeScreen($screen->image_path);
+          
+          // 2. Apply ISTQB rules
+          $applicableRules = $this->istqbEngine->getApplicableRules($uiElements);
+          
+          // 3. Generate checklist with AI
+          $checklistData = $this->openAIService->generateChecklist(
+              $uiElements, 
+              $businessDescription, 
+              $applicableRules
+          );
+          
+          // 4. Store and return
+          return $this->checklistService->create($screen, $checklistData);
+      }
+  }
+  
+  // Service layer architecture
+  class OpenAIService
+  {
+      public function generateChecklist(array $uiElements, string $description, array $rules): array
+      {
+          $prompt = $this->buildPrompt($uiElements, $description, $rules);
+          
+          return $this->callOpenAI($prompt, [
+              'model' => 'gpt-4-vision-preview',
+              'response_format' => ['type' => 'json_object'],
+              'max_tokens' => 2000
+          ]);
+      }
+      
+      private function buildPrompt(array $uiElements, string $description, array $rules): string
+      {
+          return view('prompts.checklist-generation', compact('uiElements', 'description', 'rules'))->render();
+      }
+  }
+  
+  // ISTQB rule engine
+  class ISTQBRuleEngine
+  {
+      public function getApplicableRules(array $uiElements): array
+      {
+          $rules = [];
+          
+          foreach ($uiElements as $element) {
+              $elementRules = ISTQBRule::where('applicable_elements', 'like', "%{$element['type']}%")
+                                      ->orderBy('priority', 'desc')
+                                      ->get();
+              
+              $rules = array_merge($rules, $elementRules->toArray());
+          }
+          
+          return array_unique($rules, SORT_REGULAR);
+      }
+  }
+</example>
+
+<example type="invalid">
+  // Avoid monolithic controllers
+  class ScreenController extends Controller
+  {
+      public function analyze(Request $request)
+      {
+          // Direct AI calls in controller - BAD
+          $response = Http::post('https://api.openai.com/v1/chat/completions');
+          
+          // Business logic in controller - BAD
+          $checklist = [];
+          foreach ($uiElements as $element) {
+              // Complex processing - BAD
+          }
+          
+          // Direct database operations - BAD
+          DB::table('checklists')->insert($checklist);
+      }
+  }
+  
+  // Avoid tight coupling
+  class ChecklistGenerator
+  {
+      public function generate($screenId)
+      {
+          $openAI = new OpenAI('sk-...'); // Hardcoded dependency - BAD
+          $screen = Screen::find($screenId); // Direct model access - BAD
+          
+          // Tightly coupled to specific AI provider - BAD
+          return $openAI->complete('Generate checklist');
+      }
+  }
+  
+  // Avoid missing error handling
+  public function processImage($imagePath)
+  {
+      $analysis = $this->visionAPI->analyze($imagePath); // No try-catch - BAD
+      return $analysis['elements']; // No validation - BAD
+  }
+  
+  // Avoid synchronous heavy operations
+  public function uploadAndProcess(Request $request)
+  {
+      $file = $request->file('image');
+      $analysis = $this->processImage($file); // Blocking operation - BAD
+      $checklist = $this->generateChecklist($analysis); // Another blocking operation - BAD
+      
+      return response()->json($checklist);
+  }
+  
+  // Avoid inconsistent data structure
+  // Different services returning different formats - BAD
+  OpenAIService::generate() returns ['items' => [...]]
+  VisionService::analyze() returns ['elements' => [...]]
+  ISTQBService::getRules() returns [['rule' => ...], ...]
+</example>

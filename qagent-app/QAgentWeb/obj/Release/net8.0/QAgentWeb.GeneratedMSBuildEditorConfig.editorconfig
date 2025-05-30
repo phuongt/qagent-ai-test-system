@@ -1,0 +1,111 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = QAgentWeb
+build_property.RootNamespace = QAgentWeb
+build_property.ProjectDir = C:\Customize\01.QAgent\qagent-app\QAgentWeb\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Customize\01.QAgent\qagent-app\QAgentWeb
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Admin/DatabaseMigration.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRGF0YWJhc2VNaWdyYXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Admin/SqlExecutor.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cU3FsRXhlY3V0b3IuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Auth/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Auth/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxSZWdpc3Rlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Dashboard/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJpdmFjeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC01/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwMVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC02/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwMlxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC03/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwM1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC04/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwNFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC05/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwNVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC06/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwNlxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC07/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwN1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC08/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwOFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC09/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMwOVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC10/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMxMFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/UC11/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVUMxMVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Customize/01.QAgent/qagent-app/QAgentWeb/Pages/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-azgldtrhvy
