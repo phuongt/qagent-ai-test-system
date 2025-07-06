@@ -5,7 +5,20 @@ using QAgentWeb.Data.SeedData;
 using QAgentWeb.Models;
 using QAgentWeb.Resources;
 using QAgentWeb.Services;
+using QAgentWeb.Tests;
 using System.Globalization;
+
+// Check if running in test mode
+if (args.Length > 0 && args[0] == "test-oracle")
+{
+    // Run Oracle tests
+    var testRunner = new OracleTestRunner(
+        serviceProvider: null!,
+        Microsoft.Extensions.Configuration.ConfigurationManager.Create()
+    );
+    
+    return await OracleTestRunner.Main(args.Skip(1).ToArray());
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
