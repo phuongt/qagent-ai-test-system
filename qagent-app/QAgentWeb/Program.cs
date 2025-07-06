@@ -45,6 +45,9 @@ builder.Services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>(
 // Add HttpClient
 builder.Services.AddHttpClient();
 
+// Add API Controllers
+builder.Services.AddControllers();
+
 // Add Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -100,6 +103,10 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+// Map API Controllers
+app.MapControllers();
+
+// Map Razor Pages
 app.MapRazorPages();
 
 // Ensure database is created
